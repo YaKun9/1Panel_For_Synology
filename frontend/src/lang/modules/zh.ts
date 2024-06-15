@@ -2172,20 +2172,20 @@ const message = {
     },
     xpack: {
         waf: {
-            contain:"包含",
-            equal:"等于",
-            regex:"正则",
-            notEqual:"不等于",
-            badReq:"参数错误",
-            forbidden:"无权访问",
-            noRes:"无返回",
-            serverErr:"服务器错误",
-            actionAllow:"允许",
-            deny:"拒绝",
-            captcha:"验证码",
-            fiveSeconds:"五秒"
-        }
-    }
+            contain: '包含',
+            equal: '等于',
+            regex: '正则',
+            notEqual: '不等于',
+            badReq: '参数错误',
+            forbidden: '无权访问',
+            noRes: '无返回',
+            serverErr: '服务器错误',
+            actionAllow: '允许',
+            deny: '拒绝',
+            captcha: '验证码',
+            fiveSeconds: '五秒',
+        },
+    },
 };
 export default {
     ...fit2cloudZhLocale,

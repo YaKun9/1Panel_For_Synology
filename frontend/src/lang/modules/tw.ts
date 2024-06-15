@@ -2171,21 +2171,20 @@ const message = {
     },
     xpack: {
         waf: {
-            contain:"包含",
-            equal:"等於",
-            regex:"正則",
-            notEqual:"不等於",
-            badReq:"參數錯誤",
-            forbidden:"無權訪問",
-            noRes:"無返回",
-            serverErr:"伺服器錯誤",
-            actionAllow:"允許",
-            deny:"拒絕",
-            captcha:"驗證碼",
-            fiveSeconds:"五秒"
-        }
-    }
-
+            contain: '包含',
+            equal: '等於',
+            regex: '正則',
+            notEqual: '不等於',
+            badReq: '參數錯誤',
+            forbidden: '無權訪問',
+            noRes: '無返回',
+            serverErr: '伺服器錯誤',
+            actionAllow: '允許',
+            deny: '拒絕',
+            captcha: '驗證碼',
+            fiveSeconds: '五秒',
+        },
+    },
 };
 export default {
     ...fit2cloudTwLocale,
