@@ -87,7 +87,7 @@ func (u *ImageRepoService) Create(req dto.ImageRepoCreate) error {
 	}
 	if req.Protocol == "http" {
 		_ = u.handleRegistries(req.DownloadUrl, "", "create")
-		stdout, err := cmd.Exec("systemctl restart docker")
+		stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 		if err != nil {
 			return errors.New(string(stdout))
 		}
@@ -100,7 +100,7 @@ func (u *ImageRepoService) Create(req dto.ImageRepoCreate) error {
 					cancel()
 					return errors.New("the docker service cannot be restarted")
 				default:
-					stdout, err := cmd.Exec("systemctl is-active docker")
+					stdout, err := cmd.Exec("systemctl is-active pkg-ContainerManager-dockerd")
 					if string(stdout) == "active\n" && err == nil {
 						global.LOG.Info("docker restart with new conf successful!")
 						return nil
@@ -159,7 +159,7 @@ func (u *ImageRepoService) Update(req dto.ImageRepoUpdate) error {
 		if repo.Auth {
 			_, _ = cmd.ExecWithCheck("docker", "logout", repo.DownloadUrl)
 		}
-		stdout, err := cmd.Exec("systemctl restart docker")
+		stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 		if err != nil {
 			return errors.New(string(stdout))
 		}
