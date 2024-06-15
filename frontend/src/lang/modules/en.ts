@@ -2334,20 +2334,21 @@ const message = {
     },
     xpack: {
         waf: {
-            contain:"",
-            equal:"",
-            regex:"",
-            notEqual:"",
-            badReq:"",
-            forbidden:"",
-            noRes:"",
-            serverErr:"",
-            actionAllow:"",
-            deny:"",
-            captcha:"",
-            fiveSeconds:""
+            contain:"contain",
+            equal:"equal",
+            regex:"regex",
+            notEqual:"not equal",
+            badReq:"bad request",
+            forbidden:"forbidden",
+            noRes:"no response",
+            serverErr:"server error",
+            actionAllow:"allow",
+            deny:"deny",
+            captcha:"captcha",
+            fiveSeconds:"five seconds"
         }
     }
+
 };
 
 export default {
