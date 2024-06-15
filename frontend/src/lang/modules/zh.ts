@@ -1448,8 +1448,8 @@ const message = {
         backupRecoverMessage: '如果需要设置压缩或者解压缩密码，请输入。（不填则不设置）',
     },
     license: {
-        community: '社区版：',
-        community2: '社区版',
+        community: '群晖定制：',
+        community2: '群晖定制',
         pro: '专业版：',
         trial: '试用版',
         office: '正式版',
