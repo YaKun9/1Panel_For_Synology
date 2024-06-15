@@ -4,7 +4,7 @@ before:
   hooks:
     - chmod +x ./script.sh
     - ./script.sh
-    - sed -i 's@ORIGINAL_VERSION=.*@ORIGINAL_VERSION=latest@g' 1pctl
+    - sed -i 's@ORIGINAL_VERSION=.*@ORIGINAL_VERSION=v{{ .Version }}@g' 1pctl
     - go mod tidy
     
 builds:
@@ -23,7 +23,7 @@ builds:
 
 archives:
   - format: tar.gz
-    name_template: "1panel-latest-{{ .Os }}-{{ .Arch }}{{- if .Arm }}v{{ .Arm }}{{ end }}"
+    name_template: "1panel-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{- if .Arm }}v{{ .Arm }}{{ end }}"
     wrap_in_directory: true
     files:
       - 1pctl
@@ -41,7 +41,7 @@ release:
   extra_files:
     - glob: dist/*.tar.gz
     - glob: dist/checksums.txt
-  name_template: "Release latest"
+  name_template: "Release {{.Tag}}"
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
