@@ -2332,6 +2332,22 @@ const message = {
             manage: 'Management',
         },
     },
+    xpack: {
+        waf: {
+            contain:"",
+            equal:"",
+            regex:"",
+            notEqual:"",
+            badReq:"",
+            forbidden:"",
+            noRes:"",
+            serverErr:"",
+            actionAllow:"",
+            deny:"",
+            captcha:"",
+            fiveSeconds:""
+        }
+    }
 };
 
 export default {

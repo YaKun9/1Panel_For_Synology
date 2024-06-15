@@ -2169,6 +2169,22 @@ const message = {
             manage: '管理',
         },
     },
+    xpack: {
+        waf: {
+            contain:"",
+            equal:"",
+            regex:"",
+            notEqual:"",
+            badReq:"",
+            forbidden:"",
+            noRes:"",
+            serverErr:"",
+            actionAllow:"",
+            deny:"",
+            captcha:"",
+            fiveSeconds:""
+        }
+    }
 };
 export default {
     ...fit2cloudTwLocale,
