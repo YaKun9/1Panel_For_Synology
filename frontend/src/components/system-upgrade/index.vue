@@ -125,7 +125,7 @@ const toForum = () => {
 };
 
 const toGithub = () => {
-    window.open('https://github.com/1Panel-dev/1Panel', '_blank', 'noopener,noreferrer');
+    window.open('https://github.com/yakun9/1panel_For_Synology', '_blank', 'noopener,noreferrer');
 };
 
 const onLoadUpgradeInfo = async () => {
