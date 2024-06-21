@@ -9,6 +9,8 @@
   [<a href="docs/README_TW.md">中文(繁體)</a>] | [<a href="docs/README_EN.md">English</a>] | [<a href="docs/README_JP.md">日本語</a>]
 </p>
 
+[![Watch the video](https://resource.fit2cloud.com/1panel/img/overview_video.png)](https://www.bilibili.com/video/BV1Mt421n7LZ/)
+
 ------------------------------
 
 1Panel 是新一代的 Linux 服务器运维管理面板。
@@ -18,8 +20,6 @@
 - **应用商店**：精选上架各类高质量的开源工具和应用软件，协助用户轻松安装并升级；
 - **安全可靠**：基于容器管理并部署应用，实现最小的漏洞暴露面，同时提供防火墙和日志审计等功能；
 - **一键备份**：支持一键备份和恢复，用户可以将数据备份到各类云端存储介质，永不丢失。
-
-1Panel 三分钟速览：https://www.bilibili.com/video/BV1Mt421n7LZ/
 
 ## 快速开始
 
@@ -38,10 +38,6 @@ curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_
 - [在线文档](https://1panel.cn/docs/)
 - [社区论坛](https://bbs.fit2cloud.com/c/1p/7)
 - [如何加入微信交流群?](https://bbs.fit2cloud.com/t/topic/2147)
-
-## UI 展示
-
-![UI展示](https://resource.fit2cloud.com/1panel/img/overview.png)
 
 ## Star History
 

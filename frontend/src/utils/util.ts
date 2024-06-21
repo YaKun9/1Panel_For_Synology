@@ -327,11 +327,7 @@ export function checkPort(value: string): boolean {
         return true;
     }
     const reg = /^([1-9](\d{0,3}))$|^([1-5]\d{4})$|^(6[0-4]\d{3})$|^(65[0-4]\d{2})$|^(655[0-2]\d)$|^(6553[0-5])$/;
-    if (!reg.test(value) && value !== '') {
-        return true;
-    } else {
-        return false;
-    }
+    return !reg.test(value) && value !== '';
 }
 
 export function getProvider(provider: string): string {
@@ -507,13 +503,6 @@ export async function copyText(content: string) {
     } catch (e) {
         MsgError(i18n.global.t('commons.msg.copyFailed'));
     }
-}
-
-export function getRuleType(ruleType: string) {
-    if (ruleType == '') {
-        return '';
-    }
-    return i18n.global.t(`xpack.waf.${ruleType}`);
 }
 
 export function getAction(action: string) {

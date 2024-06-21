@@ -1,4 +1,5 @@
 import fit2cloudEnLocale from 'fit2cloud-ui-plus/src/locale/lang/en';
+
 let xpackEnLocale = {};
 const xpackModules = import.meta.glob('../../xpack/lang/en.ts', { eager: true });
 if (xpackModules['../../xpack/lang/en.ts']) {
@@ -1170,6 +1171,8 @@ const message = {
         recycleBin: 'Recycle bin',
         sourcePath: 'Original path',
         deleteTime: 'Delete time',
+        confirmReduce: 'Are you sure you want to restore the following files?',
+        reduceSuccess: 'Restore successful',
         reduce: 'Reduction',
         reduceHelper:
             'If a file or directory with the same name exists in the original path, it will be overwritten. Do you want to continue?',
@@ -1511,15 +1514,20 @@ const message = {
         lastRecoverAt: 'Last recovery time',
         lastRollbackAt: 'Last rollback time',
         reDownload: 'Download the backup file again',
-        recoverRecord: 'Recover record',
+        statusSuccess: 'Success',
+        statusFailed: 'Failed',
+        recoverErrArch: 'Snapshot recovery between different server architectures is not supported!',
+        recoverErrSize: 'Detected insufficient disk space, please check or clean up and try again!',
         recoverHelper:
-            'The recovery is about to start from snapshot {0}, and the recovery needs to restart docker and 1panel service, do you want to continue?',
-        recoverHelper1:
-            'Will start restoring from snapshot {0}, please ensure that the server architecture matches the one where the snapshot was created.',
-        recoverHelper2: 'Restoring snapshots between different server architectures is not supported.',
+            'Starting recovery from snapshot {0}, please confirm the following information before proceeding:',
+        recoverHelper1: 'Recovery requires restarting Docker and 1Panel services',
+        recoverHelper2:
+            'Please ensure there is sufficient disk space on the server (Snapshot file size: {0}, Available space: {1})',
+        recoverHelper3:
+            'Please ensure the server architecture matches the architecture of the server where the snapshot was created (Current server architecture: {0})',
         rollback: 'Rollback',
         rollbackHelper:
-            'This recovery is about to be rolled back, which will replace all the files recovered this time. In the process, docker and 1panel services may need to be restarted. Do you want to continue?',
+            'Rolling back this recovery will replace all files from this recovery, and may require restarting Docker and 1Panel services. Do you want to continue?',
 
         upgradeHelper: 'The upgrade requires restarting the 1Panel service. Do you want to continue?',
         noUpgrade: 'It is currently the latest version',
@@ -1553,8 +1561,7 @@ const message = {
         menu: 'Menu',
         confirmMessage: 'The page will be refreshed to update the advanced menu list. Continue?',
         compressPassword: 'Compression Password',
-        backupRecoverMessage:
-            'If you need to set a compression or decompression password, please enter it. (Leave blank if not needed)',
+        backupRecoverMessage: 'Please enter the compression or decompression password (leave blank to not set)',
     },
     license: {
         community: 'Community Edition: ',
@@ -2027,6 +2034,14 @@ const message = {
             'Only supports importing local backups, importing backups from other machines may cause recovery failure',
         ipWebsiteWarn: 'Websites with IP as domain names need to be set as default sites to be accessed normally',
         hstsHelper: 'Enabling HSTS can increase website security',
+        defaultHtml: 'Default page',
+        website404: 'Website 404 error page',
+        domain404: 'Website page does not exist',
+        indexHtml: 'Static website default page',
+        stopHtml: 'Website stop page',
+        indexPHP: 'PHP website default page',
+        sslExpireDate: 'Certificate expiration date',
+        website404Helper: 'Website 404 error page only supports PHP runtime environment websites and static websites',
     },
     php: {
         short_open_tag: 'Short tag support',
@@ -2141,6 +2156,10 @@ const message = {
         nameserver: 'DNS server',
         nameserverHelper: 'Use a custom DNS server to verify domain names',
         edit: 'Edit certificate',
+        execShell: 'Execute the script after applying for the certificate',
+        shell: 'Script content',
+        shellHelper:
+            'The default execution directory of the script is the 1Panel installation directory. If a certificate is pushed, the execution directory is the certificate push directory. The default timeout is 30 minutes',
     },
     firewall: {
         create: 'Create rule',
@@ -2204,8 +2223,14 @@ const message = {
         addressHelper2: 'For multiple IPs or IP ranges, separate with commas: 172.16.10.11, 172.16.0.0/24',
         allIP: 'All IP',
         portRule: 'Port rule',
+        forwardRule: 'Forwarding',
         ipRule: 'IP rule',
         userAgent: 'User-Agent filter',
+        sourcePort: 'Source Port',
+        targetIP: 'Destination IP',
+        targetPort: 'Destination Port',
+        forwardHelper1: 'In the case of local port forwarding, the destination IP is: 127.0.0.1',
+        forwardHelper2: 'If the destination IP is not filled in, it will be forwarded to the local port by default',
     },
     runtime: {
         runtime: 'Runtime',

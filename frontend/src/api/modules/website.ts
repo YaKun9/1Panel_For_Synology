@@ -7,7 +7,7 @@ import { deepCopy } from '@/utils/util';
 import { Base64 } from 'js-base64';
 
 export const SearchWebsites = (req: Website.WebSiteSearch) => {
-    return http.post<ResPage<Website.WebsiteDTO>>(`/websites/search`, req);
+    return http.post<ResPage<Website.WebsiteRes>>(`/websites/search`, req);
 };
 
 export const ListWebsites = () => {
@@ -267,4 +267,12 @@ export const DownloadFile = (params: Website.SSLDownload) => {
 
 export const GetCA = (id: number) => {
     return http.get<Website.CADTO>(`/websites/ca/${id}`);
+};
+
+export const GetDefaultHtml = (type: string) => {
+    return http.get<Website.WebsiteHtml>(`/websites/default/html/${type}`);
+};
+
+export const UpdateDefaultHtml = (req: Website.WebsiteHtmlUpdate) => {
+    return http.post(`/websites/default/html/update`, req);
 };
