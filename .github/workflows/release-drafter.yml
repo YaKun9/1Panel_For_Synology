@@ -36,17 +36,21 @@ jobs:
           version: latest
           args: release --skip=publish --clean
 
-      - name: Get the latest tag
-        id: get_latest_tag
+      - name: Get previous tag
+        id: get_previous_tag
         run: |
-          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "::set-output name=LATEST_TAG::$latest_tag"
+          tags=$(git tag --sort=-creatordate)
+          latest_tag=$(echo "$tags" | sed -n 1p)
+          previous_tag=$(echo "$tags" | sed -n 2p)
+          echo "Latest tag: $latest_tag"
+          echo "Previous tag: $previous_tag"
+          echo "::set-output name=PREVIOUS_TAG::$previous_tag"
 
-      - name: List commits since last release
+      - name: List commits since previous release
         id: list_commits
         run: |
-          latest_tag=${{ steps.get_latest_tag.outputs.LATEST_TAG }}
-          commits=$(git log ${latest_tag}..HEAD --pretty=format:"%h %s")
+          previous_tag=${{ steps.get_previous_tag.outputs.PREVIOUS_TAG }}
+          commits=$(git log ${previous_tag}..HEAD --pretty=format:"%h %s")
           echo "$commits"
           echo "::set-output name=COMMITS::$commits"
 
@@ -59,7 +63,7 @@ jobs:
             dist/*.tar.gz
             dist/checksums.txt
           body: |
-            # 适用于群晖DS920+
+            ## 适用于群晖DS920+
             ${{ steps.list_commits.outputs.COMMITS }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
