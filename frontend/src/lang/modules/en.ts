@@ -229,6 +229,7 @@ const message = {
         status: {
             running: 'Running',
             done: 'Done',
+            scanFailed: 'Incomplete',
             success: 'Success',
             waiting: 'Waiting',
             waiting1: 'Waiting',
@@ -1058,6 +1059,19 @@ const message = {
                 'Disabling the selected FTP account will revoke its access permissions. Do you want to continue?',
             syncHelper: 'Sync FTP account data between server and database. Do you want to continue?',
         },
+        clam: {
+            clam: 'Virus Scan',
+            clamCreate: 'Create Scan Rule',
+            scanDate: 'Scan Date',
+            scanTime: 'Elapsed Time',
+            scannedFiles: 'Number of Scanned Files',
+            infectedFiles: 'Number of Infected Files',
+            log: 'Details',
+            clamConf: 'Scan Configuration',
+            clamLog: 'Scan Log',
+            freshClam: 'Virus Database Refresh Configuration',
+            freshClamLog: 'Virus Database Refresh Log',
+        },
     },
     logs: {
         panelLog: 'Panel logs',
@@ -1752,7 +1766,8 @@ const message = {
         ignoreList: 'ignore list',
         appHelper: 'Please view the installation instructions of some applications on the application details page',
         backupApp: 'Backup application before upgrade',
-        backupAppHelper: 'If the upgrade fails, you can use the application backup to roll back',
+        backupAppHelper:
+            'If the upgrade fails, the backup will be automatically rolled back. Please check the failure reason in the log audit-system log',
         delete: 'Delete',
         openrestyDeleteHelper:
             'Forcibly deleting OpenResty will delete all websites, please confirm the risk before operation',
