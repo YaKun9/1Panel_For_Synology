@@ -1003,6 +1003,8 @@ const message = {
         },
         clam: {
             clam: '病毒掃描',
+            noClam: '未檢測到 ClamAV 服務，請參考官方文檔進行安裝！',
+            notStart: '目前沒有運行 ClamAV 服務，請先啟動！',
             clamCreate: '創建掃描規則',
             scanDate: '掃描時間',
             scanTime: '耗時',
@@ -1153,6 +1155,8 @@ const message = {
         back: '後退',
         top: '返回上一層',
         refresh: '重新整理',
+        openWithVscode: 'VS Code 打開',
+        vscodeHelper: '請確保本地已安裝 VS Code 並配置了 SSH Remote 插件',
     },
     ssh: {
         autoStart: '開機自啟',
@@ -2138,6 +2142,7 @@ const message = {
         customScriptHelper: '請填寫完整的啟動指令，例如：npm run start',
         portError: '不能填寫相同連接埠',
         systemRestartHelper: '狀態說明：中斷-系統重新啟動導致狀態取得失敗',
+        javaScriptHelper: '請填寫完整啟動指令，例如：java -jar halo.jar',
     },
     process: {
         pid: '進程ID',
