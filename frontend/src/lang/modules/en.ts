@@ -1061,6 +1061,8 @@ const message = {
         },
         clam: {
             clam: 'Virus Scan',
+            noClam: 'ClamAV service not detected, please refer to the official documentation for installation!',
+            notStart: 'ClamAV service is currently not running, please start it first!',
             clamCreate: 'Create Scan Rule',
             scanDate: 'Scan Date',
             scanTime: 'Elapsed Time',
@@ -1215,6 +1217,8 @@ const message = {
         back: 'Back',
         top: 'Go Back',
         refresh: 'Refresh',
+        openWithVscode: 'Open with VS Code',
+        vscodeHelper: 'Please make sure that VS Code is installed locally and the SSH Remote plugin is configured',
     },
     ssh: {
         autoStart: 'Auto Start',
@@ -2302,6 +2306,7 @@ const message = {
         customScriptHelper: 'Please fill in the complete startup command, for example: npm run start',
         portError: 'Cannot fill in the same port',
         systemRestartHelper: 'Status description: Interruption - status acquisition failed due to system restart',
+        javaScriptHelper: 'Please fill in the complete startup command, for example: java -jar halo.jar',
     },
     process: {
         pid: 'Process ID',
