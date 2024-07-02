@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/1Panel-dev/1Panel/backend/constant"
 	"github.com/1Panel-dev/1Panel/backend/global"
 )
 
@@ -53,10 +54,10 @@ func (db *dbWrapper) Exec(query string, args ...interface{}) (sql.Result, error)
 
 func Source(dns string, reader io.Reader, opts ...SourceOption) error {
 	start := time.Now()
-	global.LOG.Infof("source start at %s", start.Format("2006-01-02 15:04:05"))
+	global.LOG.Infof("source start at %s", start.Format(constant.DateTimeLayout))
 	defer func() {
 		end := time.Now()
-		global.LOG.Infof("source end at %s, cost %s", end.Format("2006-01-02 15:04:05"), end.Sub(start))
+		global.LOG.Infof("source end at %s, cost %s", end.Format(constant.DateTimeLayout), end.Sub(start))
 	}()
 
 	var err error
