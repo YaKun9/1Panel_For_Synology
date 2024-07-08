@@ -43,13 +43,7 @@
                                 <el-option :label="$t('firewall.unUsed')" value="free"></el-option>
                                 <el-option :label="$t('firewall.used')" value="used"></el-option>
                             </el-select>
-                            <el-select
-                                v-model="searchStrategy"
-                                style="margin-left: 10px"
-                                @change="search()"
-                                clearable
-                                class="p-w-200"
-                            >
+                            <el-select v-model="searchStrategy" @change="search()" clearable class="p-w-200 ml-2.5">
                                 <template #prefix>{{ $t('firewall.strategy') }}</template>
                                 <el-option :label="$t('commons.table.all')" value=""></el-option>
                                 <el-option :label="$t('firewall.accept')" value="accept"></el-option>

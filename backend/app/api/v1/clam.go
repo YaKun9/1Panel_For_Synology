@@ -164,6 +164,29 @@ func (b *BaseApi) SearchClamRecord(c *gin.Context) {
 }
 
 // @Tags Clam
+// @Summary Load clam record detail
+// @Description 获取扫描结果详情
+// @Accept json
+// @Param request body dto.ClamLogReq true "request"
+// @Success 200
+// @Security ApiKeyAuth
+// @Router /toolbox/clam/record/log [post]
+func (b *BaseApi) LoadClamRecordLog(c *gin.Context) {
+	var req dto.ClamLogReq
+	if err := helper.CheckBindAndValidate(&req, c); err != nil {
+		return
+	}
+
+	content, err := clamService.LoadRecordLog(req)
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+
+	helper.SuccessWithData(c, content)
+}
+
+// @Tags Clam
 // @Summary Load clam file
 // @Description 获取扫描文件
 // @Accept json
@@ -210,18 +233,18 @@ func (b *BaseApi) UpdateFile(c *gin.Context) {
 // @Summary Delete clam
 // @Description 删除扫描规则
 // @Accept json
-// @Param request body dto.BatchDeleteReq true "request"
+// @Param request body dto.ClamDelete true "request"
 // @Success 200
 // @Security ApiKeyAuth
 // @Router /toolbox/clam/del [post]
 // @x-panel-log {"bodyKeys":["ids"],"paramKeys":[],"BeforeFunctions":[{"input_column":"id","input_value":"ids","isList":true,"db":"clams","output_column":"name","output_value":"names"}],"formatZH":"删除扫描规则 [names]","formatEN":"delete clam [names]"}
 func (b *BaseApi) DeleteClam(c *gin.Context) {
-	var req dto.BatchDeleteReq
+	var req dto.ClamDelete
 	if err := helper.CheckBindAndValidate(&req, c); err != nil {
 		return
 	}
 
-	if err := clamService.Delete(req.Ids); err != nil {
+	if err := clamService.Delete(req); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
