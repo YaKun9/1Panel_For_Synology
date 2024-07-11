@@ -117,11 +117,11 @@ export const searchClamRecord = (param: Toolbox.ClamSearchLog) => {
 export const getClamRecordLog = (param: Toolbox.ClamRecordReq) => {
     return http.post<string>(`/toolbox/clam/record/log`, param);
 };
-export const searchClamFile = (name: string) => {
-    return http.post<string>(`/toolbox/clam/file/search`, { name: name });
+export const searchClamFile = (name: string, tail: string) => {
+    return http.post<string>(`/toolbox/clam/file/search`, { name: name, tail: tail });
 };
 export const updateClamFile = (name: string, file: string) => {
-    return http.post(`/toolbox/clam/file/update`, { name: name, file: file });
+    return http.post(`/toolbox/clam/file/update`, { name: name, file: file }, TimeoutEnum.T_60S);
 };
 export const searchClamBaseInfo = () => {
     return http.post<Toolbox.ClamBaseInfo>(`/toolbox/clam/base`);

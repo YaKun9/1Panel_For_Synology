@@ -29,6 +29,7 @@
                             <el-input v-model.trim="dialogData.rowData!.targetIP" />
                             <span class="input-help">{{ $t('firewall.forwardHelper1') }}</span>
                             <span class="input-help">{{ $t('firewall.forwardHelper2') }}</span>
+                            <span class="input-help">{{ $t('firewall.forwardHelper3') }}</span>
                         </el-form-item>
 
                         <el-form-item :label="$t('firewall.targetPort')" prop="targetPort">
@@ -58,7 +59,7 @@ import DrawerHeader from '@/components/drawer-header/index.vue';
 import { MsgSuccess } from '@/utils/message';
 import { Host } from '@/api/interface/host';
 import { operateForwardRule } from '@/api/modules/host';
-import { checkCidr, checkIpV4V6, checkPort, deepCopy } from '@/utils/util';
+import { checkCidr, checkIp, checkPort, deepCopy } from '@/utils/util';
 
 const loading = ref();
 const oldRule = ref<Host.RuleForward>();
@@ -89,14 +90,14 @@ const handleClose = () => {
 
 const rules = reactive({
     protocol: [Rules.requiredSelect],
-    port: [{ validator: checkPortRule, trigger: 'blur' }],
-    targetPort: [{ validator: checkPortRule, trigger: 'blur' }],
+    port: [{ validator: checkPortRule, trigger: 'blur', required: true }],
+    targetPort: [{ validator: checkPortRule, trigger: 'blur', required: true }],
     targetIP: [{ validator: checkAddress, trigger: 'blur' }],
 });
 
 function checkPortRule(rule: any, value: string, callback: any) {
     if (!value) {
-        return callback();
+        return callback(new Error(i18n.global.t('firewall.portFormatError')));
     }
     if (checkPort(value)) {
         return callback(new Error(i18n.global.t('firewall.portFormatError')));
@@ -114,7 +115,7 @@ function checkAddress(rule: any, value: string, callback: any) {
                 return callback(new Error(i18n.global.t('firewall.addressFormatError')));
             }
         } else {
-            if (checkIpV4V6(item)) {
+            if (checkIp(item)) {
                 return callback(new Error(i18n.global.t('firewall.addressFormatError')));
             }
         }

@@ -917,6 +917,9 @@ const message = {
         errPath: 'Backup path [{0}] error, cannot download!',
         cutWebsiteLog: 'Cut Website Log',
         cutWebsiteLogHelper: 'The cut log files will be backed up to the backup directory of 1Panel',
+
+        requestExpirationTime: 'Upload Request Expiration Time（Hours）',
+        unitHours: 'Unit: Hours',
     },
     monitor: {
         monitor: 'Monitor',
@@ -1074,6 +1077,8 @@ const message = {
         },
         clam: {
             clam: 'Virus Scan',
+            showFresh: 'Show Virus Database Service',
+            hideFresh: 'Hide Virus Database Service',
             clamHelper:
                 'The minimum recommended configuration for ClamAV is: 3 GiB of RAM or more, single-core CPU with 2.0 GHz or higher, and at least 5 GiB of available hard disk space.',
             noClam: 'ClamAV service not detected, please refer to the official documentation for installation!',
@@ -1097,6 +1102,7 @@ const message = {
             infectedDir: 'Infected Directory',
             scanDate: 'Scan Date',
             scanResult: 'Scan log tail',
+            tail: 'Lines',
             scanTime: 'Time Taken',
             infectedFiles: 'Infected Files',
             log: 'Details',
@@ -1349,8 +1355,8 @@ const message = {
         systemIP: 'System Address',
         proxy: 'Server Proxy',
         proxyHelper: 'After setting up the proxy server, it will be effective in the following scenarios:',
-        proxyHelper1: 'Downloading and synchronizing installation packages from the app store',
-        proxyHelper2: 'System version upgrades and retrieving update information',
+        proxyHelper1: 'Downloading and synchronizing installation packages from the app store (Professional)',
+        proxyHelper2: 'System version upgrades and retrieving update information (Professional)',
         proxyHelper3: 'Verification and synchronization of system licenses',
         proxyType: 'Proxy Type',
         proxyUrl: 'Proxy Address',
@@ -2287,6 +2293,7 @@ const message = {
         targetPort: 'Destination Port',
         forwardHelper1: 'In the case of local port forwarding, the destination IP is: 127.0.0.1',
         forwardHelper2: 'If the destination IP is not filled in, it will be forwarded to the local port by default',
+        forwardHelper3: 'Currently only supports port forwarding for IPv4',
     },
     runtime: {
         runtime: 'Runtime',

@@ -442,6 +442,7 @@ func (w WebsiteService) GetWebsite(id uint) (response.WebsiteDTO, error) {
 	res.ErrorLogPath = path.Join(sitePath, "log", "error.log")
 	res.AccessLogPath = path.Join(sitePath, "log", "access.log")
 	res.SitePath = sitePath
+	res.SiteDir = website.SiteDir
 	return res, nil
 }
 

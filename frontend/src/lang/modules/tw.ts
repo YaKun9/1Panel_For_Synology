@@ -873,6 +873,9 @@ const message = {
         errPath: '備份路徑 [{0}] 錯誤，無法下載！',
         cutWebsiteLog: '切割網站日誌',
         cutWebsiteLogHelper: '切割的日誌文件會備份到 1Panel 的 backup 目錄下',
+
+        requestExpirationTime: '上傳請求過期時間（小時）',
+        unitHours: '單位：小時',
     },
     monitor: {
         monitor: '監控',
@@ -1016,6 +1019,8 @@ const message = {
         },
         clam: {
             clam: '病毒掃描',
+            showFresh: '顯示病毒庫服務',
+            hideFresh: '隱藏病毒庫服務',
             clamHelper:
                 'ClamAV 的最低建議配置為：3 GiB 以上的 RAM，2.0 GHz 以上的單核 CPU，以及至少 5 GiB 的可用硬盤空間。',
             noClam: '未檢測到 ClamAV 服務，請參考官方文檔進行安裝！',
@@ -1038,6 +1043,7 @@ const message = {
             infectedDir: '隔離目錄',
             scanDate: '掃描時間',
             scanResult: '掃描報告條數',
+            tail: '日誌顯示行數',
             scanTime: '耗時',
             infectedFiles: '感染文件數',
             log: '詳情',
@@ -1278,8 +1284,8 @@ const message = {
         systemIP: '伺服器地址',
         proxy: '代理伺服器',
         proxyHelper: '設置代理伺服器後，將在以下場景中生效：',
-        proxyHelper1: '應用商店的安裝包下載和同步',
-        proxyHelper2: '系統版本升級及獲取更新說明',
+        proxyHelper1: '應用商店的安裝包下載和同步（專業版功能）',
+        proxyHelper2: '系統版本升級及獲取更新說明（專業版功能）',
         proxyHelper3: '系統許可證的驗證和同步',
         proxyType: '代理類型',
         proxyUrl: '代理地址',
@@ -2125,6 +2131,7 @@ const message = {
         targetPort: '目標端口',
         forwardHelper1: '如果是本機端口轉發，目標 IP 為：127.0.0.1',
         forwardHelper2: '如果目標 IP 不填寫，默認為本機端口轉發',
+        forwardHelper3: '當前僅支持 IPv4 的端口轉發',
     },
     runtime: {
         runtime: '運行環境',

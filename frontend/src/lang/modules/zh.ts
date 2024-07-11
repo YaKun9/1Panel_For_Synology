@@ -874,6 +874,9 @@ const message = {
         errPath: '备份路径 [{0}] 错误，无法下载！',
         cutWebsiteLog: '切割网站日志',
         cutWebsiteLogHelper: '切割的日志文件会备份到 1Panel 的 backup 目录下',
+
+        requestExpirationTime: '上传请求过期时间（小时）',
+        unitHours: '单位：小时',
     },
     monitor: {
         monitor: '监控',
@@ -1017,6 +1020,8 @@ const message = {
         },
         clam: {
             clam: '病毒扫描',
+            showFresh: '显示病毒库服务',
+            hideFresh: '隐藏病毒库服务',
             clamHelper:
                 'ClamAV 的最低建议配置为：3 GiB 以上的 RAM，2.0 GHz 以上的单核 CPU，以及至少 5 GiB 的可用硬盘空间',
             doc: '帮助文档',
@@ -1040,6 +1045,7 @@ const message = {
             infectedDir: '隔离目录',
             scanDate: '扫描时间',
             scanResult: '扫描报告条数',
+            tail: '日志显示行数',
             scanTime: '耗时',
             infectedFiles: '感染文件数',
             log: '详情',
@@ -1280,8 +1286,8 @@ const message = {
         systemIP: '服务器地址',
         proxy: '代理服务器',
         proxyHelper: '设置代理服务器后，将在以下场景中生效：',
-        proxyHelper1: '应用商店的安装包下载和同步',
-        proxyHelper2: '系统版本升级及获取更新说明',
+        proxyHelper1: '应用商店的安装包下载和同步（专业版功能）',
+        proxyHelper2: '系统版本升级及获取更新说明（专业版功能）',
         proxyHelper3: '系统许可证的验证和同步',
         proxyType: '代理类型',
         proxyUrl: '代理地址',
@@ -2128,6 +2134,7 @@ const message = {
         targetPort: '目标端口',
         forwardHelper1: '如果是本机端口转发，目标IP为：127.0.0.1',
         forwardHelper2: '如果目标IP不填写，则默认为本机端口转发',
+        forwardHelper3: '当前仅支持 ipv4 的端口转发',
     },
     runtime: {
         runtime: '运行环境',
