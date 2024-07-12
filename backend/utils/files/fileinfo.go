@@ -7,6 +7,7 @@ import (
 	"github.com/1Panel-dev/1Panel/backend/buserr"
 	"github.com/1Panel-dev/1Panel/backend/constant"
 	"io/fs"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -44,6 +45,7 @@ type FileInfo struct {
 	Items      []*FileInfo `json:"items"`
 	ItemTotal  int         `json:"itemTotal"`
 	FavoriteID uint        `json:"favoriteID"`
+	IsDetail   bool        `json:"isDetail"`
 }
 
 type FileOption struct {
@@ -57,6 +59,7 @@ type FileOption struct {
 	PageSize   int    `json:"pageSize"`
 	SortBy     string `json:"sortBy"`
 	SortOrder  string `json:"sortOrder"`
+	IsDetail   bool   `json:"isDetail"`
 }
 
 type FileSearchInfo struct {
@@ -89,6 +92,7 @@ func NewFileInfo(op FileOption) (*FileInfo, error) {
 		Gid:       strconv.FormatUint(uint64(info.Sys().(*syscall.Stat_t).Gid), 10),
 		Group:     GetGroup(info.Sys().(*syscall.Stat_t).Gid),
 		MimeType:  GetMimeType(op.Path),
+		IsDetail:  op.IsDetail,
 	}
 	favoriteRepo := repo.NewIFavoriteRepo()
 	favorite, _ := favoriteRepo.GetFirst(favoriteRepo.WithByPath(op.Path))
@@ -322,25 +326,31 @@ func (f *FileInfo) getContent() error {
 	if err != nil {
 		return nil
 	}
-	if len(cByte) > 0 && DetectBinary(cByte) {
-		return buserr.New(constant.ErrFileCanNotRead)
+	if !f.IsDetail {
+		if len(cByte) > 0 && DetectBinary(cByte) {
+			return buserr.New(constant.ErrFileCanNotRead)
+		}
 	}
 	f.Content = string(cByte)
 	return nil
 }
 
 func DetectBinary(buf []byte) bool {
-	whiteByte := 0
-	n := min(1024, len(buf))
-	for i := 0; i < n; i++ {
-		if (buf[i] >= 0x20) || buf[i] == 9 || buf[i] == 10 || buf[i] == 13 {
-			whiteByte++
-		} else if buf[i] <= 6 || (buf[i] >= 14 && buf[i] <= 31) {
-			return true
+	mimeType := http.DetectContentType(buf)
+	if !strings.HasPrefix(mimeType, "text/") {
+		whiteByte := 0
+		n := min(1024, len(buf))
+		for i := 0; i < n; i++ {
+			if (buf[i] >= 0x20) || buf[i] == 9 || buf[i] == 10 || buf[i] == 13 {
+				whiteByte++
+			} else if buf[i] <= 6 || (buf[i] >= 14 && buf[i] <= 31) {
+				return true
+			}
 		}
+		return whiteByte < 1
 	}
+	return false
 
-	return whiteByte < 1
 }
 
 func min(x, y int) int {

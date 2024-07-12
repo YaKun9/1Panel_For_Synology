@@ -108,7 +108,7 @@ func (f *Firewall) ListPort() ([]FireInfo, error) {
 				continue
 			}
 			itemRule := f.loadInfo(rule)
-			if (len(itemRule.Port) != 0 && itemRule.Family == "ipv4") || (itemRule.Family == "ipv6" && len(itemRule.Address) != 0) {
+			if len(itemRule.Port) != 0 && (itemRule.Family == "ipv4" || (itemRule.Family == "ipv6" && len(itemRule.Address) != 0)) {
 				datas = append(datas, itemRule)
 			}
 		}
@@ -129,6 +129,12 @@ func (f *Firewall) ListForward() ([]FireInfo, error) {
 		})
 		if ForwardListRegex.MatchString(line) {
 			match := ForwardListRegex.FindStringSubmatch(line)
+			if len(match) < 4 {
+				continue
+			}
+			if len(match[4]) == 0 {
+				match[4] = "127.0.0.1"
+			}
 			datas = append(datas, FireInfo{
 				Port:       match[1],
 				Protocol:   match[2],

@@ -118,26 +118,36 @@ export namespace Toolbox {
     }
 
     export interface ClamBaseInfo {
-        version:  string;
+        version: string;
         isActive: boolean;
         isExist: boolean;
+
+        freshVersion: string;
+        freshIsExist: boolean;
+        freshIsActive: boolean;
     }
     export interface ClamInfo {
         id: number;
         name: string;
         path: string;
+        infectedStrategy: string;
+        infectedDir: string;
         lastHandleDate: string;
         description: string;
     }
     export interface ClamCreate {
         name: string;
         path: string;
+        infectedStrategy: string;
+        infectedDir: string;
         description: string;
     }
     export interface ClamUpdate {
         id: number;
         name: string;
         path: string;
+        infectedStrategy: string;
+        infectedDir: string;
         description: string;
     }
     export interface ClamSearchLog extends ReqPage {
@@ -145,13 +155,17 @@ export namespace Toolbox {
         startTime: Date;
         endTime: Date;
     }
+    export interface ClamRecordReq {
+        tail: string;
+        clamName: string;
+        recordName: string;
+    }
     export interface ClamLog {
         name: string;
         scanDate: string;
         scanTime: string;
-        scannedFiles: string;
+        totalError: string;
         infectedFiles: string;
-        log: string;
         status: string;
     }
 }

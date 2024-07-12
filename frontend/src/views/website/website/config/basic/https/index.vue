@@ -23,7 +23,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item :label="'HSTS'" prop="hsts">
-                        <el-checkbox v-model="form.hsts">{{ $t('commons.button.start') }}</el-checkbox>
+                        <el-checkbox v-model="form.hsts">{{ $t('commons.button.enable') }}</el-checkbox>
                         <span class="input-help">{{ $t('website.hstsHelper') }}</span>
                     </el-form-item>
                     <el-form-item :label="$t('website.sslConfig')" prop="type">
@@ -107,6 +107,9 @@
                             </el-descriptions-item>
                             <el-descriptions-item :label="$t('website.otherDomains')">
                                 {{ websiteSSL.domains }}
+                            </el-descriptions-item>
+                            <el-descriptions-item :label="$t('website.brand')">
+                                {{ websiteSSL.organization }}
                             </el-descriptions-item>
                             <el-descriptions-item :label="$t('ssl.provider')">
                                 {{ getProvider(websiteSSL.provider) }}

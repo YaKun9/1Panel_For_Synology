@@ -26,7 +26,8 @@ import (
 const (
 	clamServiceNameCentOs = "clamd@scan.service"
 	clamServiceNameUbuntu = "clamav-daemon.service"
-	scanDir               = "scan-result"
+	freshClamService      = "clamav-freshclam.service"
+	resultDir             = "clamav"
 )
 
 type ClamService struct {
@@ -39,12 +40,14 @@ type IClamService interface {
 	SearchWithPage(search dto.SearchWithPage) (int64, interface{}, error)
 	Create(req dto.ClamCreate) error
 	Update(req dto.ClamUpdate) error
-	Delete(ids []uint) error
+	Delete(req dto.ClamDelete) error
 	HandleOnce(req dto.OperateByID) error
-	LoadFile(req dto.OperationWithName) (string, error)
+	LoadFile(req dto.ClamFileReq) (string, error)
 	UpdateFile(req dto.UpdateByNameAndFile) error
 	LoadRecords(req dto.ClamLogSearch) (int64, interface{}, error)
 	CleanRecord(req dto.OperateByID) error
+
+	LoadRecordLog(req dto.ClamLogReq) (string, error)
 }
 
 func NewIClamService() IClamService {
@@ -54,6 +57,7 @@ func NewIClamService() IClamService {
 func (f *ClamService) LoadBaseInfo() (dto.ClamBaseInfo, error) {
 	var baseInfo dto.ClamBaseInfo
 	baseInfo.Version = "-"
+	baseInfo.FreshVersion = "-"
 	exist1, _ := systemctl.IsExist(clamServiceNameCentOs)
 	if exist1 {
 		f.serviceName = clamServiceNameCentOs
@@ -65,6 +69,11 @@ func (f *ClamService) LoadBaseInfo() (dto.ClamBaseInfo, error) {
 		f.serviceName = clamServiceNameUbuntu
 		baseInfo.IsExist = true
 		baseInfo.IsActive, _ = systemctl.IsActive(clamServiceNameUbuntu)
+	}
+	freshExist, _ := systemctl.IsExist(freshClamService)
+	if freshExist {
+		baseInfo.FreshIsExist = true
+		baseInfo.FreshIsActive, _ = systemctl.IsActive(freshClamService)
 	}
 
 	if baseInfo.IsActive {
@@ -78,6 +87,17 @@ func (f *ClamService) LoadBaseInfo() (dto.ClamBaseInfo, error) {
 			baseInfo.Version = strings.TrimPrefix(version, "ClamAV ")
 		}
 	}
+	if baseInfo.FreshIsActive {
+		version, err := cmd.Exec("freshclam --version")
+		if err != nil {
+			return baseInfo, nil
+		}
+		if strings.Contains(version, "/") {
+			baseInfo.FreshVersion = strings.TrimPrefix(strings.Split(version, "/")[0], "ClamAV ")
+		} else {
+			baseInfo.FreshVersion = strings.TrimPrefix(version, "ClamAV ")
+		}
+	}
 	return baseInfo, nil
 }
 
@@ -85,6 +105,12 @@ func (f *ClamService) Operate(operate string) error {
 	switch operate {
 	case "start", "restart", "stop":
 		stdout, err := cmd.Execf("systemctl %s %s", operate, f.serviceName)
+		if err != nil {
+			return fmt.Errorf("%s the %s failed, err: %s", operate, f.serviceName, stdout)
+		}
+		return nil
+	case "fresh-start", "fresh-restart", "fresh-stop":
+		stdout, err := cmd.Execf("systemctl %s %s", strings.TrimPrefix(operate, "fresh-"), freshClamService)
 		if err != nil {
 			return fmt.Errorf("%s the %s failed, err: %s", operate, f.serviceName, stdout)
 		}
@@ -115,11 +141,11 @@ func (f *ClamService) SearchWithPage(req dto.SearchWithPage) (int64, interface{}
 			return logPaths[i] > logPaths[j]
 		})
 		if len(logPaths) != 0 {
-			t1, err := time.ParseInLocation("20060102150405", logPaths[0], nyc)
+			t1, err := time.ParseInLocation(constant.DateTimeSlimLayout, logPaths[0], nyc)
 			if err != nil {
 				continue
 			}
-			datas[i].LastHandleDate = t1.Format("2006-01-02 15:04:05")
+			datas[i].LastHandleDate = t1.Format(constant.DateTimeLayout)
 		}
 	}
 	return total, datas, err
@@ -133,6 +159,9 @@ func (f *ClamService) Create(req dto.ClamCreate) error {
 	if err := copier.Copy(&clam, &req); err != nil {
 		return errors.WithMessage(constant.ErrStructTransform, err.Error())
 	}
+	if clam.InfectedStrategy == "none" || clam.InfectedStrategy == "remove" {
+		clam.InfectedDir = ""
+	}
 	if err := clamRepo.Create(&clam); err != nil {
 		return err
 	}
@@ -144,9 +173,14 @@ func (f *ClamService) Update(req dto.ClamUpdate) error {
 	if clam.ID == 0 {
 		return constant.ErrRecordNotFound
 	}
+	if req.InfectedStrategy == "none" || req.InfectedStrategy == "remove" {
+		req.InfectedDir = ""
+	}
 	upMap := map[string]interface{}{}
 	upMap["name"] = req.Name
 	upMap["path"] = req.Path
+	upMap["infected_dir"] = req.InfectedDir
+	upMap["infected_strategy"] = req.InfectedStrategy
 	upMap["description"] = req.Description
 	if err := clamRepo.Update(req.ID, upMap); err != nil {
 		return err
@@ -154,15 +188,23 @@ func (f *ClamService) Update(req dto.ClamUpdate) error {
 	return nil
 }
 
-func (u *ClamService) Delete(ids []uint) error {
-	if len(ids) == 1 {
-		clam, _ := clamRepo.Get(commonRepo.WithByID(ids[0]))
+func (u *ClamService) Delete(req dto.ClamDelete) error {
+	for _, id := range req.Ids {
+		clam, _ := clamRepo.Get(commonRepo.WithByID(id))
 		if clam.ID == 0 {
-			return constant.ErrRecordNotFound
+			continue
 		}
-		return clamRepo.Delete(commonRepo.WithByID(ids[0]))
+		if req.RemoveRecord {
+			_ = os.RemoveAll(path.Join(global.CONF.System.DataDir, resultDir, clam.Name))
+		}
+		if req.RemoveInfected {
+			_ = os.RemoveAll(path.Join(clam.InfectedDir, "1panel-infected", clam.Name))
+		}
+		if err := clamRepo.Delete(commonRepo.WithByID(id)); err != nil {
+			return err
+		}
 	}
-	return clamRepo.Delete(commonRepo.WithIdsIn(ids))
+	return nil
 }
 
 func (u *ClamService) HandleOnce(req dto.OperateByID) error {
@@ -173,13 +215,34 @@ func (u *ClamService) HandleOnce(req dto.OperateByID) error {
 	if cmd.CheckIllegal(clam.Path) {
 		return buserr.New(constant.ErrCmdIllegal)
 	}
-	logFile := path.Join(global.CONF.System.DataDir, scanDir, clam.Name, time.Now().Format("20060102150405"))
+	timeNow := time.Now().Format(constant.DateTimeSlimLayout)
+	logFile := path.Join(global.CONF.System.DataDir, resultDir, clam.Name, timeNow)
 	if _, err := os.Stat(path.Dir(logFile)); err != nil {
 		_ = os.MkdirAll(path.Dir(logFile), os.ModePerm)
 	}
 	go func() {
-		cmd := exec.Command("clamdscan", "--fdpass", clam.Path, "-l", logFile)
-		_, _ = cmd.CombinedOutput()
+		strategy := ""
+		switch clam.InfectedStrategy {
+		case "remove":
+			strategy = "--remove"
+		case "move":
+			dir := path.Join(clam.InfectedDir, "1panel-infected", clam.Name, timeNow)
+			strategy = "--move=" + dir
+			if _, err := os.Stat(dir); err != nil {
+				_ = os.MkdirAll(dir, os.ModePerm)
+			}
+		case "copy":
+			dir := path.Join(clam.InfectedDir, "1panel-infected", clam.Name, timeNow)
+			strategy = "--copy=" + dir
+			if _, err := os.Stat(dir); err != nil {
+				_ = os.MkdirAll(dir, os.ModePerm)
+			}
+		}
+		global.LOG.Debugf("clamdscan --fdpass %s %s -l %s", strategy, clam.Path, logFile)
+		stdout, err := cmd.Execf("clamdscan --fdpass %s %s -l %s", strategy, clam.Path, logFile)
+		if err != nil {
+			global.LOG.Errorf("clamdscan failed, stdout: %v, err: %v", string(stdout), err)
+		}
 	}()
 	return nil
 }
@@ -197,7 +260,7 @@ func (u *ClamService) LoadRecords(req dto.ClamLogSearch) (int64, interface{}, er
 	var filterFiles []string
 	nyc, _ := time.LoadLocation(common.LoadTimeZone())
 	for _, item := range logPaths {
-		t1, err := time.ParseInLocation("20060102150405", item, nyc)
+		t1, err := time.ParseInLocation(constant.DateTimeSlimLayout, item, nyc)
 		if err != nil {
 			continue
 		}
@@ -226,10 +289,25 @@ func (u *ClamService) LoadRecords(req dto.ClamLogSearch) (int64, interface{}, er
 
 	var datas []dto.ClamLog
 	for i := 0; i < len(records); i++ {
-		item := loadResultFromLog(path.Join(global.CONF.System.DataDir, scanDir, clam.Name, records[i]))
+		item := loadResultFromLog(path.Join(global.CONF.System.DataDir, resultDir, clam.Name, records[i]))
 		datas = append(datas, item)
 	}
 	return int64(total), datas, nil
+}
+func (u *ClamService) LoadRecordLog(req dto.ClamLogReq) (string, error) {
+	logPath := path.Join(global.CONF.System.DataDir, resultDir, req.ClamName, req.RecordName)
+	var tail string
+	if req.Tail != "0" {
+		tail = req.Tail
+	} else {
+		tail = "+1"
+	}
+	cmd := exec.Command("tail", "-n", tail, logPath)
+	stdout, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("tail -n %v failed, err: %v", req.Tail, err)
+	}
+	return string(stdout), nil
 }
 
 func (u *ClamService) CleanRecord(req dto.OperateByID) error {
@@ -237,12 +315,12 @@ func (u *ClamService) CleanRecord(req dto.OperateByID) error {
 	if clam.ID == 0 {
 		return constant.ErrRecordNotFound
 	}
-	pathItem := path.Join(global.CONF.System.DataDir, scanDir, clam.Name)
+	pathItem := path.Join(global.CONF.System.DataDir, resultDir, clam.Name)
 	_ = os.RemoveAll(pathItem)
 	return nil
 }
 
-func (u *ClamService) LoadFile(req dto.OperationWithName) (string, error) {
+func (u *ClamService) LoadFile(req dto.ClamFileReq) (string, error) {
 	filePath := ""
 	switch req.Name {
 	case "clamd":
@@ -252,6 +330,10 @@ func (u *ClamService) LoadFile(req dto.OperationWithName) (string, error) {
 			filePath = "/etc/clamd.d/scan.conf"
 		}
 	case "clamd-log":
+		filePath = u.loadLogPath("clamd-log")
+		if len(filePath) != 0 {
+			break
+		}
 		if u.serviceName == clamServiceNameUbuntu {
 			filePath = "/var/log/clamav/clamav.log"
 		} else {
@@ -264,10 +346,14 @@ func (u *ClamService) LoadFile(req dto.OperationWithName) (string, error) {
 			filePath = "/etc/freshclam.conf"
 		}
 	case "freshclam-log":
+		filePath = u.loadLogPath("freshclam-log")
+		if len(filePath) != 0 {
+			break
+		}
 		if u.serviceName == clamServiceNameUbuntu {
 			filePath = "/var/log/clamav/freshclam.log"
 		} else {
-			filePath = "/var/log/clamav/freshclam.log"
+			filePath = "/var/log/freshclam.log"
 		}
 	default:
 		return "", fmt.Errorf("not support such type")
@@ -275,11 +361,18 @@ func (u *ClamService) LoadFile(req dto.OperationWithName) (string, error) {
 	if _, err := os.Stat(filePath); err != nil {
 		return "", buserr.New("ErrHttpReqNotFound")
 	}
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", err
+	var tail string
+	if req.Tail != "0" {
+		tail = req.Tail
+	} else {
+		tail = "+1"
 	}
-	return string(content), nil
+	cmd := exec.Command("tail", "-n", tail, filePath)
+	stdout, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("tail -n %v failed, err: %v", req.Tail, err)
+	}
+	return string(stdout), nil
 }
 
 func (u *ClamService) UpdateFile(req dto.UpdateByNameAndFile) error {
@@ -319,7 +412,7 @@ func (u *ClamService) UpdateFile(req dto.UpdateByNameAndFile) error {
 
 func loadFileByName(name string) []string {
 	var logPaths []string
-	pathItem := path.Join(global.CONF.System.DataDir, scanDir, name)
+	pathItem := path.Join(global.CONF.System.DataDir, resultDir, name)
 	_ = filepath.Walk(pathItem, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -340,7 +433,6 @@ func loadResultFromLog(pathItem string) dto.ClamLog {
 	if err != nil {
 		return data
 	}
-	data.Log = string(file)
 	lines := strings.Split(string(file), "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "- SCAN SUMMARY -") {
@@ -352,6 +444,8 @@ func loadResultFromLog(pathItem string) dto.ClamLog {
 		switch {
 		case strings.HasPrefix(line, "Infected files:"):
 			data.InfectedFiles = strings.TrimPrefix(line, "Infected files:")
+		case strings.HasPrefix(line, "Total errors:"):
+			data.TotalError = strings.TrimPrefix(line, "Total errors:")
 		case strings.HasPrefix(line, "Time:"):
 			if strings.Contains(line, "(") {
 				data.ScanTime = strings.ReplaceAll(strings.Split(line, "(")[1], ")", "")
@@ -363,4 +457,43 @@ func loadResultFromLog(pathItem string) dto.ClamLog {
 		}
 	}
 	return data
+}
+func (u *ClamService) loadLogPath(name string) string {
+	confPath := ""
+	if name == "clamd-log" {
+		if u.serviceName == clamServiceNameUbuntu {
+			confPath = "/etc/clamav/clamd.conf"
+		} else {
+			confPath = "/etc/clamd.d/scan.conf"
+		}
+	} else {
+		if u.serviceName == clamServiceNameUbuntu {
+			confPath = "/etc/clamav/freshclam.conf"
+		} else {
+			confPath = "/etc/freshclam.conf"
+		}
+	}
+	if _, err := os.Stat(confPath); err != nil {
+		return ""
+	}
+	content, err := os.ReadFile(confPath)
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(string(content), "\n")
+	if name == "clamd-log" {
+		for _, line := range lines {
+			if strings.HasPrefix(line, "LogFile ") {
+				return strings.Trim(strings.ReplaceAll(line, "LogFile ", ""), " ")
+			}
+		}
+	} else {
+		for _, line := range lines {
+			if strings.HasPrefix(line, "UpdateLogFile ") {
+				return strings.Trim(strings.ReplaceAll(line, "UpdateLogFile ", ""), " ")
+			}
+		}
+	}
+
+	return ""
 }

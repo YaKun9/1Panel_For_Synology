@@ -364,7 +364,7 @@ func (u *BackupService) Update(req dto.BackupOperate) error {
 					dirStr = dirStr[:strings.LastIndex(dirStr, "/")]
 				}
 				if err := copyDir(oldDir, dirStr); err != nil {
-					_ = backupRepo.Update(req.ID, (map[string]interface{}{"vars": oldVars}))
+					_ = backupRepo.Update(req.ID, map[string]interface{}{"vars": oldVars})
 					return err
 				}
 				global.CONF.System.Backup = dirStr
@@ -414,8 +414,6 @@ func (u *BackupService) NewClient(backup *model.BackupAccount) (cloud_storage.Cl
 	case constant.OSS, constant.S3, constant.MinIo, constant.Cos, constant.Kodo:
 		varMap["accessKey"] = backup.AccessKey
 		varMap["secretKey"] = backup.Credential
-	case constant.OneDrive:
-		varMap["accessToken"] = backup.Credential
 	}
 
 	backClient, err := cloud_storage.NewCloudStorageClient(backup.Type, varMap)
@@ -453,14 +451,13 @@ func (u *BackupService) loadAccessToken(backup *model.BackupAccount) error {
 	if err := json.Unmarshal([]byte(backup.Vars), &varMap); err != nil {
 		return fmt.Errorf("unmarshal backup vars failed, err: %v", err)
 	}
-	token, refreshToken, err := client.RefreshToken("authorization_code", varMap)
+	refreshToken, err := client.RefreshToken("authorization_code", "refreshToken", varMap)
 	if err != nil {
 		return err
 	}
 	delete(varMap, "code")
-	backup.Credential = token
 	varMap["refresh_status"] = constant.StatusSuccess
-	varMap["refresh_time"] = time.Now().Format("2006-01-02 15:04:05")
+	varMap["refresh_time"] = time.Now().Format(constant.DateTimeLayout)
 	varMap["refresh_token"] = refreshToken
 	itemVars, err := json.Marshal(varMap)
 	if err != nil {
@@ -587,10 +584,10 @@ func (u *BackupService) checkBackupConn(backup *model.BackupAccount) (bool, erro
 	}
 	defer file.Close()
 	write := bufio.NewWriter(file)
-	_, _ = write.WriteString(string("1Panel 备份账号测试文件。\n"))
-	_, _ = write.WriteString(string("1Panel 備份賬號測試文件。\n"))
-	_, _ = write.WriteString(string("1Panel Backs up account test files.\n"))
-	_, _ = write.WriteString(string("1Panelアカウントのテストファイルをバックアップします。\n"))
+	_, _ = write.WriteString("1Panel 备份账号测试文件。\n")
+	_, _ = write.WriteString("1Panel 備份賬號測試文件。\n")
+	_, _ = write.WriteString("1Panel Backs up account test files.\n")
+	_, _ = write.WriteString("1Panelアカウントのテストファイルをバックアップします。\n")
 	write.Flush()
 
 	targetPath := strings.TrimPrefix(path.Join(backup.BackupPath, "test/1panel"), "/")
@@ -599,7 +596,7 @@ func (u *BackupService) checkBackupConn(backup *model.BackupAccount) (bool, erro
 
 func StartRefreshOneDriveToken() {
 	service := NewIBackupService()
-	oneDriveCronID, err := global.Cron.AddJob("0 * * * *", service)
+	oneDriveCronID, err := global.Cron.AddJob("0 3 */31 * *", service)
 	if err != nil {
 		global.LOG.Errorf("can not add OneDrive corn job: %s", err.Error())
 		return
@@ -613,19 +610,15 @@ func (u *BackupService) Run() {
 	if backupItem.ID == 0 {
 		return
 	}
-	if len(backupItem.Credential) == 0 {
-		global.LOG.Error("OneDrive configuration lacks token information, please rebind.")
-		return
-	}
 	global.LOG.Info("start to refresh token of OneDrive ...")
 	varMap := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(backupItem.Vars), &varMap); err != nil {
 		global.LOG.Errorf("Failed to refresh OneDrive token, please retry, err: %v", err)
 		return
 	}
-	token, refreshToken, err := client.RefreshToken("refresh_token", varMap)
+	refreshToken, err := client.RefreshToken("refresh_token", "refreshToken", varMap)
 	varMap["refresh_status"] = constant.StatusSuccess
-	varMap["refresh_time"] = time.Now().Format("2006-01-02 15:04:05")
+	varMap["refresh_time"] = time.Now().Format(constant.DateTimeLayout)
 	if err != nil {
 		varMap["refresh_status"] = constant.StatusFailed
 		varMap["refresh_msg"] = err.Error()
@@ -638,8 +631,7 @@ func (u *BackupService) Run() {
 	_ = global.DB.Model(&model.BackupAccount{}).
 		Where("id = ?", backupItem.ID).
 		Updates(map[string]interface{}{
-			"credential": token,
-			"vars":       varsItem,
+			"vars": varsItem,
 		}).Error
 	global.LOG.Info("Successfully refreshed OneDrive token.")
 }

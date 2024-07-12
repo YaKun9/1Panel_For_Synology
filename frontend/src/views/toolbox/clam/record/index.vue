@@ -4,7 +4,7 @@
             <el-card>
                 <div>
                     <el-tag class="float-left" effect="dark" type="success">
-                        {{ dialogData.rowData.name }}
+                        {{ $t('commons.table.name') }}: {{ dialogData.rowData.name }}
                     </el-tag>
                     <el-popover
                         v-if="dialogData.rowData.path.length >= 35"
@@ -15,7 +15,7 @@
                     >
                         <template #reference>
                             <el-tag style="float: left" effect="dark" type="success">
-                                {{ dialogData.rowData.path.substring(0, 20) }}...
+                                {{ $t('file.path') }}: {{ dialogData.rowData.path.substring(0, 20) }}...
                             </el-tag>
                         </template>
                     </el-popover>
@@ -25,7 +25,7 @@
                         effect="dark"
                         type="success"
                     >
-                        {{ dialogData.rowData.path }}
+                        {{ $t('toolbox.clam.scanDir') }}: {{ dialogData.rowData.path }}
                     </el-tag>
 
                     <span class="buttons">
@@ -102,40 +102,61 @@
                         </el-col>
                         <el-col :span="17">
                             <el-form label-position="top" :v-key="refresh">
-                                <el-row v-if="currentRecord?.status === 'Done'">
+                                <el-row>
                                     <el-form-item class="descriptionWide">
                                         <template #label>
                                             <span class="status-label">{{ $t('toolbox.clam.scanTime') }}</span>
                                         </template>
                                         <span class="status-count">
-                                            {{ currentRecord?.scanTime }}
+                                            {{ currentRecord?.status === 'Done' ? currentRecord?.scanTime : '-' }}
                                         </span>
                                     </el-form-item>
                                     <el-form-item class="descriptionWide">
                                         <template #label>
                                             <span class="status-label">{{ $t('toolbox.clam.infectedFiles') }}</span>
                                         </template>
-                                        <span class="status-count">
-                                            {{ currentRecord?.infectedFiles }}
+                                        <span class="status-count" v-if="!hasInfectedDir()">
+                                            {{ currentRecord?.status === 'Done' ? currentRecord?.infectedFiles : '-' }}
                                         </span>
+                                        <div class="count" v-else>
+                                            <span @click="toFolder(currentRecord?.name)">
+                                                {{
+                                                    currentRecord?.status === 'Done'
+                                                        ? currentRecord?.infectedFiles
+                                                        : '-'
+                                                }}
+                                            </span>
+                                        </div>
                                     </el-form-item>
                                 </el-row>
-                                <el-row v-if="currentRecord?.log">
-                                    <span>{{ $t('commons.table.records') }}</span>
+                                <el-row>
+                                    <el-select
+                                        class="descriptionWide"
+                                        @change="search"
+                                        v-model.number="searchInfo.tail"
+                                    >
+                                        <template #prefix>{{ $t('toolbox.clam.scanResult') }}</template>
+                                        <el-option :value="0" :label="$t('commons.table.all')" />
+                                        <el-option :value="10" :label="10" />
+                                        <el-option :value="100" :label="100" />
+                                        <el-option :value="200" :label="200" />
+                                        <el-option :value="500" :label="500" />
+                                        <el-option :value="1000" :label="1000" />
+                                    </el-select>
                                     <codemirror
                                         ref="mymirror"
                                         :autofocus="true"
                                         :placeholder="$t('cronjob.noLogs')"
                                         :indent-with-tab="true"
                                         :tabSize="4"
-                                        style="height: calc(100vh - 488px); width: 100%; margin-top: 5px"
+                                        style="height: calc(100vh - 498px); width: 100%; margin-top: 5px"
                                         :lineWrapping="true"
                                         :matchBrackets="true"
                                         theme="cobalt"
                                         :styleActiveLine="true"
                                         :extensions="extensions"
                                         @ready="handleReady"
-                                        v-model="currentRecord.log"
+                                        v-model="logContent"
                                         :disabled="true"
                                     />
                                 </el-row>
@@ -157,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, reactive, ref, shallowRef } from 'vue';
+import { nextTick, onBeforeUnmount, reactive, ref, shallowRef } from 'vue';
 import i18n from '@/lang';
 import { ElMessageBox } from 'element-plus';
 import { Codemirror } from 'vue-codemirror';
@@ -166,7 +187,9 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { MsgSuccess } from '@/utils/message';
 import { shortcuts } from '@/utils/shortcuts';
 import { Toolbox } from '@/api/interface/toolbox';
-import { cleanClamRecord, handleClamScan, searchClamRecord } from '@/api/modules/toolbox';
+import { cleanClamRecord, getClamRecordLog, handleClamScan, searchClamRecord } from '@/api/modules/toolbox';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 const loading = ref();
 const refresh = ref(false);
@@ -188,6 +211,7 @@ interface DialogProps {
 const dialogData = ref();
 const records = ref<Array<Toolbox.ClamLog>>([]);
 const currentRecord = ref<Toolbox.ClamLog>();
+const logContent = ref();
 
 const acceptParams = async (params: DialogProps): Promise<void> => {
     let itemSize = Number(localStorage.getItem(searchInfo.cacheSizeKey));
@@ -212,6 +236,11 @@ const handleCurrentChange = (val: number) => {
     searchInfo.page = val;
     search();
 };
+const hasInfectedDir = () => {
+    return (
+        dialogData.value.rowData!.infectedStrategy === 'move' || dialogData.value.rowData!.infectedStrategy === 'copy'
+    );
+};
 
 const timeRangeLoad = ref<[Date, Date]>([
     new Date(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7).setHours(0, 0, 0, 0)),
@@ -221,8 +250,8 @@ const searchInfo = reactive({
     cacheSizeKey: 'clam-record-page-size',
     page: 1,
     pageSize: 8,
+    tail: '100',
     recordTotal: 0,
-    cronjobID: 0,
     startTime: new Date(),
     endTime: new Date(),
 });
@@ -239,6 +268,10 @@ const onHandle = async (row: Toolbox.ClamInfo) => {
             loading.value = false;
         });
 };
+const toFolder = async (path: string) => {
+    let folder = dialogData.value.rowData!.infectedDir + '/1panel-infected/' + path;
+    router.push({ path: '/hosts/files', query: { path: folder } });
+};
 
 const search = async () => {
     if (timeRangeLoad.value && timeRangeLoad.value.length === 2) {
@@ -252,6 +285,7 @@ const search = async () => {
         page: searchInfo.page,
         pageSize: searchInfo.pageSize,
         clamID: dialogData.value.rowData!.id,
+        tail: searchInfo.tail,
         startTime: searchInfo.startTime,
         endTime: searchInfo.endTime,
     };
@@ -265,10 +299,32 @@ const search = async () => {
     if (!currentRecord.value) {
         currentRecord.value = records.value[0];
     }
+    loadRecordLog();
 };
 
 const clickRow = async (row: Toolbox.ClamLog) => {
     currentRecord.value = row;
+    loadRecordLog();
+};
+
+const loadRecordLog = async () => {
+    let param = {
+        tail: searchInfo.tail + '',
+        clamName: dialogData.value.rowData?.name,
+        recordName: currentRecord.value.name,
+    };
+    const res = await getClamRecordLog(param);
+    if (logContent.value === res.data) {
+        return;
+    }
+    logContent.value = res.data;
+    nextTick(() => {
+        const state = view.value.state;
+        view.value.dispatch({
+            selection: { anchor: state.doc.length, head: state.doc.length },
+            scrollIntoView: true,
+        });
+    });
 };
 
 const onClean = async () => {
@@ -278,7 +334,6 @@ const onClean = async () => {
         type: 'warning',
     }).then(async () => {
         loading.value = true;
-        console.log(dialogData.value.id);
         cleanClamRecord(dialogData.value.rowData.id)
             .then(() => {
                 loading.value = false;
@@ -332,6 +387,16 @@ defineExpose({
     margin-top: 10px;
     font-size: 12px;
     float: right;
+}
+
+.count {
+    span {
+        font-size: 25px;
+        color: $primary-color;
+        font-weight: 500;
+        line-height: 32px;
+        cursor: pointer;
+    }
 }
 
 @media only screen and (max-width: 1400px) {

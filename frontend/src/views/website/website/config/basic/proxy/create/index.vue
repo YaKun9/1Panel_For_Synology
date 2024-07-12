@@ -7,7 +7,7 @@
         :before-close="handleClose"
     >
         <template #header>
-            <DrawerHeader :header="$t('website.' + proxy.operate + 'Proxy')" :back="handleClose" />
+            <DrawerHeader :header="$t('commons.button.' + proxy.operate)" :back="handleClose" />
         </template>
         <el-row v-loading="loading">
             <el-col :span="22" :offset="1">
@@ -26,6 +26,10 @@
                     </el-form-item>
                     <el-form-item :label="$t('website.enableCache')" prop="cache">
                         <el-switch v-model="proxy.cache" @change="changeCache(proxy.cache)"></el-switch>
+                    </el-form-item>
+                    <el-form-item :label="$t('website.sni')" prop="sni">
+                        <el-switch v-model="proxy.sni"></el-switch>
+                        <span class="input-help">{{ $t('website.sniHelper') }}</span>
                     </el-form-item>
                     <el-form-item :label="$t('website.cacheTime')" prop="cacheTime" v-if="proxy.cache">
                         <el-input v-model.number="proxy.cacheTime" maxlength="15">

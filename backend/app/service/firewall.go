@@ -96,7 +96,10 @@ func (u *FirewallService) SearchWithPage(req dto.RuleSearch) (int64, interface{}
 
 	if len(req.Info) != 0 {
 		for _, addr := range rules {
-			if strings.Contains(addr.Address, req.Info) {
+			if strings.Contains(addr.Address, req.Info) ||
+				strings.Contains(addr.Port, req.Info) ||
+				strings.Contains(addr.TargetPort, req.Info) ||
+				strings.Contains(addr.TargetIP, req.Info) {
 				datas = append(datas, addr)
 			}
 		}
@@ -301,6 +304,21 @@ func (u *FirewallService) OperateForwardRule(req dto.ForwardRuleOperate) error {
 	client, err := firewall.NewFirewallClient()
 	if err != nil {
 		return err
+	}
+
+	rules, _ := client.ListForward()
+	for _, rule := range rules {
+		for _, reqRule := range req.Rules {
+			if reqRule.Operation == "remove" {
+				continue
+			}
+			if reqRule.TargetIP == "" {
+				reqRule.TargetIP = "127.0.0.1"
+			}
+			if reqRule.Port == rule.Port && reqRule.TargetPort == rule.TargetPort && reqRule.TargetIP == rule.TargetIP {
+				return constant.ErrRecordExist
+			}
+		}
 	}
 
 	sort.SliceStable(req.Rules, func(i, j int) bool {

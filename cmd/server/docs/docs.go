@@ -1585,6 +1585,12 @@ const docTemplate = `{
                 }
             }
         },
+        "/containers/download/log": {
+            "post": {
+                "description": "下载容器日志",
+                "responses": {}
+            }
+        },
         "/containers/image": {
             "get": {
                 "security": [
@@ -11155,7 +11161,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.BatchDeleteReq"
+                            "$ref": "#/definitions/dto.ClamDelete"
                         }
                     }
                 ],
@@ -11206,7 +11212,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.OperationWithName"
+                            "$ref": "#/definitions/dto.ClamFileReq"
                         }
                     }
                 ],
@@ -11386,6 +11392,39 @@ const docTemplate = `{
                     "formatEN": "clean clam record [name]",
                     "formatZH": "清空扫描报告 [name]",
                     "paramKeys": []
+                }
+            }
+        },
+        "/toolbox/clam/record/log": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取扫描结果详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clam"
+                ],
+                "summary": "Load clam record detail",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ClamLogReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
                 }
             }
         },
@@ -12885,6 +12924,57 @@ const docTemplate = `{
                     ],
                     "formatEN": "Delete website ca [name]",
                     "formatZH": "删除网站 ca [name]",
+                    "paramKeys": []
+                }
+            }
+        },
+        "/websites/ca/download": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "下载 CA 证书文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Website CA"
+                ],
+                "summary": "Download CA file",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.WebsiteResourceReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-panel-log": {
+                    "BeforeFunctions": [
+                        {
+                            "db": "website_cas",
+                            "input_column": "id",
+                            "input_value": "id",
+                            "isList": false,
+                            "output_column": "name",
+                            "output_value": "name"
+                        }
+                    ],
+                    "bodyKeys": [
+                        "id"
+                    ],
+                    "formatEN": "download ca file [name]",
+                    "formatZH": "下载 CA 证书文件 [name]",
                     "paramKeys": []
                 }
             }
@@ -15443,6 +15533,15 @@ const docTemplate = `{
         "dto.ClamBaseInfo": {
             "type": "object",
             "properties": {
+                "freshIsActive": {
+                    "type": "boolean"
+                },
+                "freshIsExist": {
+                    "type": "boolean"
+                },
+                "freshVersion": {
+                    "type": "string"
+                },
                 "isActive": {
                     "type": "boolean"
                 },
@@ -15460,10 +15559,64 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "infectedDir": {
+                    "type": "string"
+                },
+                "infectedStrategy": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ClamDelete": {
+            "type": "object",
+            "required": [
+                "ids"
+            ],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "removeInfected": {
+                    "type": "boolean"
+                },
+                "removeRecord": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ClamFileReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "tail": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ClamLogReq": {
+            "type": "object",
+            "properties": {
+                "clamName": {
+                    "type": "string"
+                },
+                "recordName": {
+                    "type": "string"
+                },
+                "tail": {
                     "type": "string"
                 }
             }
@@ -15500,6 +15653,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "infectedDir": {
+                    "type": "string"
+                },
+                "infectedStrategy": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -19693,6 +19852,9 @@ const docTemplate = `{
                 "group": {
                     "type": "string"
                 },
+                "isDetail": {
+                    "type": "boolean"
+                },
                 "isDir": {
                     "type": "boolean"
                 },
@@ -20116,6 +20278,9 @@ const docTemplate = `{
                 "domains": {
                     "type": "string"
                 },
+                "execShell": {
+                    "type": "boolean"
+                },
                 "expireDate": {
                     "type": "string"
                 },
@@ -20151,6 +20316,9 @@ const docTemplate = `{
                 },
                 "pushDir": {
                     "type": "boolean"
+                },
+                "shell": {
+                    "type": "string"
                 },
                 "skipDNS": {
                     "type": "boolean"
@@ -20519,6 +20687,9 @@ const docTemplate = `{
                 "path"
             ],
             "properties": {
+                "isDetail": {
+                    "type": "boolean"
+                },
                 "path": {
                     "type": "string"
                 }
@@ -20672,6 +20843,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "expand": {
+                    "type": "boolean"
+                },
+                "isDetail": {
                     "type": "boolean"
                 },
                 "page": {
@@ -21663,6 +21837,9 @@ const docTemplate = `{
                 "domains": {
                     "type": "string"
                 },
+                "execShell": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -21682,6 +21859,9 @@ const docTemplate = `{
                 },
                 "renew": {
                     "type": "boolean"
+                },
+                "shell": {
+                    "type": "string"
                 },
                 "sslID": {
                     "type": "integer"
@@ -22168,6 +22348,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "sni": {
+                    "type": "boolean"
                 }
             }
         },
@@ -22242,6 +22425,9 @@ const docTemplate = `{
                 "dnsAccountId": {
                     "type": "integer"
                 },
+                "execShell": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -22265,6 +22451,9 @@ const docTemplate = `{
                 },
                 "pushDir": {
                     "type": "boolean"
+                },
+                "shell": {
+                    "type": "string"
                 },
                 "skipDNS": {
                     "type": "boolean"
@@ -22318,6 +22507,9 @@ const docTemplate = `{
                 "dnsAccountId": {
                     "type": "integer"
                 },
+                "execShell": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -22341,6 +22533,9 @@ const docTemplate = `{
                 },
                 "pushDir": {
                     "type": "boolean"
+                },
+                "shell": {
+                    "type": "string"
                 },
                 "skipDNS": {
                     "type": "boolean"
@@ -22724,6 +22919,9 @@ const docTemplate = `{
                 "group": {
                     "type": "string"
                 },
+                "isDetail": {
+                    "type": "boolean"
+                },
                 "isDir": {
                     "type": "boolean"
                 },
@@ -22786,8 +22984,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/response.FileTree"
                     }
                 },
+                "extension": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
+                },
+                "isDir": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"

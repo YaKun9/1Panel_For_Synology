@@ -336,7 +336,7 @@ func (w WebsiteService) CreateWebsite(create request.WebsiteCreate) (err error) 
 				}
 				website.Proxy = proxy
 			}
-		case constant.RuntimeNode, constant.RuntimeJava:
+		case constant.RuntimeNode, constant.RuntimeJava, constant.RuntimeGo:
 			website.Proxy = fmt.Sprintf("127.0.0.1:%d", runtime.Port)
 		}
 	}
@@ -442,6 +442,7 @@ func (w WebsiteService) GetWebsite(id uint) (response.WebsiteDTO, error) {
 	res.ErrorLogPath = path.Join(sitePath, "log", "error.log")
 	res.AccessLogPath = path.Join(sitePath, "log", "access.log")
 	res.SitePath = sitePath
+	res.SiteDir = website.SiteDir
 	return res, nil
 }
 
@@ -1643,6 +1644,11 @@ func (w WebsiteService) OperateProxy(req request.WebsiteProxyConfig) (err error)
 	} else {
 		location.RemoveSubFilter()
 	}
+	if req.SNI {
+		location.UpdateDirective("proxy_ssl_server_name", []string{"on"})
+	} else {
+		location.UpdateDirective("proxy_ssl_server_name", []string{"off"})
+	}
 	if err = nginx.WriteConfig(config, nginx.IndentedStyle); err != nil {
 		return buserr.WithErr(constant.ErrUpdateBuWebsite, err)
 	}
@@ -1718,6 +1724,11 @@ func (w WebsiteService) GetProxies(id uint) (res []request.WebsiteProxyConfig, e
 		proxyConfig.Modifier = location.Modifier
 		proxyConfig.ProxyHost = location.Host
 		proxyConfig.Replaces = location.Replaces
+		for _, directive := range location.Directives {
+			if directive.GetName() == "proxy_ssl_server_name" {
+				proxyConfig.SNI = directive.GetParameters()[0] == "on"
+			}
+		}
 		res = append(res, proxyConfig)
 	}
 	return

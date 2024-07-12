@@ -196,6 +196,9 @@ func (u *MysqlService) LoadFromRemote(req dto.MysqlLoadDB) error {
 		for i := 0; i < len(databases); i++ {
 			if strings.EqualFold(databases[i].Name, data.Name) && strings.EqualFold(databases[i].MysqlName, data.MysqlName) {
 				hasOld = true
+				if databases[i].IsDelete {
+					_ = mysqlRepo.Update(databases[i].ID, map[string]interface{}{"is_delete": false})
+				}
 				deleteList = append(deleteList[:i], deleteList[i+1:]...)
 				break
 			}
@@ -518,11 +521,11 @@ func (u *MysqlService) LoadStatus(req dto.OperationWithNameAndType) (*dto.MysqlS
 
 	if value, ok := statusMap["Run"]; ok {
 		uptime, _ := strconv.Atoi(value)
-		info.Run = time.Unix(time.Now().Unix()-int64(uptime), 0).Format("2006-01-02 15:04:05")
+		info.Run = time.Unix(time.Now().Unix()-int64(uptime), 0).Format(constant.DateTimeLayout)
 	} else {
 		if value, ok := statusMap["Uptime"]; ok {
 			uptime, _ := strconv.Atoi(value)
-			info.Run = time.Unix(time.Now().Unix()-int64(uptime), 0).Format("2006-01-02 15:04:05")
+			info.Run = time.Unix(time.Now().Unix()-int64(uptime), 0).Format(constant.DateTimeLayout)
 		}
 	}
 

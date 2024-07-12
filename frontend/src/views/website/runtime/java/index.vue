@@ -33,7 +33,7 @@
                             </el-text>
                         </template>
                     </el-table-column>
-                    <el-table-column :label="$t('runtime.codeDir')" prop="codeDir">
+                    <el-table-column :label="$t('website.runDir')" prop="codeDir">
                         <template #default="{ row }">
                             <el-button type="primary" link @click="toFolder(row.codeDir)">
                                 <el-icon>
@@ -210,7 +210,7 @@ const openDetail = (row: Runtime.Runtime) => {
     operateRef.value.acceptParams({ type: row.type, mode: 'edit', id: row.id });
 };
 
-const openDelete = async (row: Runtime.Runtime) => {
+const openDelete = (row: Runtime.Runtime) => {
     RuntimeDeleteCheck(row.id).then(async (res) => {
         const items = res.data;
         if (res.data && res.data.length > 0) {

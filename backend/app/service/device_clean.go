@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/1Panel-dev/1Panel/backend/constant"
 	"github.com/1Panel-dev/1Panel/backend/utils/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -72,7 +73,7 @@ func (u *DeviceService) Scan() dto.CleanData {
 	snapTree := loadSnapshotTree(fileOp)
 	snapSize := uint64(0)
 	for _, snap := range snapTree {
-		snapSize += uint64(snap.Size)
+		snapSize += snap.Size
 	}
 	treeData = append(treeData, dto.CleanTree{
 		ID:          uuid.NewString(),
@@ -87,7 +88,7 @@ func (u *DeviceService) Scan() dto.CleanData {
 	rollBackTree := loadRollBackTree(fileOp)
 	rollbackSize := uint64(0)
 	for _, rollback := range rollBackTree {
-		rollbackSize += uint64(rollback.Size)
+		rollbackSize += rollback.Size
 	}
 	treeData = append(treeData, dto.CleanTree{
 		ID:          uuid.NewString(),
@@ -113,7 +114,7 @@ func (u *DeviceService) Scan() dto.CleanData {
 	unusedTree := loadUnusedFile(fileOp)
 	unusedSize := uint64(0)
 	for _, unused := range unusedTree {
-		unusedSize += uint64(unused.Size)
+		unusedSize += unused.Size
 	}
 	treeData = append(treeData, dto.CleanTree{
 		ID:          uuid.NewString(),
@@ -278,7 +279,7 @@ func (u *DeviceService) Clean(req []dto.Clean) {
 		}
 	}
 
-	_ = settingRepo.Update("LastCleanTime", time.Now().Format("2006-01-02 15:04:05"))
+	_ = settingRepo.Update("LastCleanTime", time.Now().Format(constant.DateTimeLayout))
 	_ = settingRepo.Update("LastCleanSize", fmt.Sprintf("%v", size))
 	_ = settingRepo.Update("LastCleanData", fmt.Sprintf("%v", len(req)))
 
@@ -342,7 +343,7 @@ func (u *DeviceService) CleanForCronjob() (string, error) {
 			}
 		}
 	}
-	timeNow := time.Now().Format("2006-01-02 15:04:05")
+	timeNow := time.Now().Format(constant.DateTimeLayout)
 	dropFileOrDirWithLog(path.Join(global.CONF.System.BaseDir, dockerLogPath), &logs, &size, &fileCount)
 	logs += fmt.Sprintf("\n%s: total clean: %s, total count: %d", timeNow, common.LoadSizeUnit2F(float64(size)), fileCount)
 

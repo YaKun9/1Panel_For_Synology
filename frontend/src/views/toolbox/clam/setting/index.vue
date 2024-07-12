@@ -5,7 +5,7 @@
                 <ClamStatus v-model:loading="loading" />
             </template>
             <template #title>
-                <back-button name="Clam" header="Clamav">
+                <back-button name="Clam" header="ClamAV">
                     <template #buttons>
                         <el-button type="primary" :plain="activeName !== 'clamd'" @click="search('clamd')">
                             {{ $t('toolbox.clam.clamConf') }}
@@ -29,6 +29,15 @@
 
             <template #main>
                 <div>
+                    <el-select v-if="!canUpdate()" style="width: 20%" @change="search()" v-model.number="tail">
+                        <template #prefix>{{ $t('toolbox.clam.tail') }}</template>
+                        <el-option :value="0" :label="$t('commons.table.all')" />
+                        <el-option :value="10" :label="10" />
+                        <el-option :value="100" :label="100" />
+                        <el-option :value="200" :label="200" />
+                        <el-option :value="500" :label="500" />
+                        <el-option :value="1000" :label="1000" />
+                    </el-select>
                     <codemirror
                         :autofocus="true"
                         :placeholder="$t('commons.msg.noneData')"
@@ -42,9 +51,9 @@
                         @ready="handleReady"
                         :extensions="extensions"
                         v-model="content"
-                        :disabled="canUpdate()"
+                        :disabled="!canUpdate()"
                     />
-                    <el-button type="primary" style="margin-top: 10px" v-if="!canUpdate()" @click="onSave">
+                    <el-button type="primary" style="margin-top: 10px" v-if="canUpdate()" @click="onSave">
                         {{ $t('commons.button.save') }}
                     </el-button>
                 </div>
@@ -75,25 +84,29 @@ const handleReady = (payload) => {
 };
 
 const activeName = ref('clamd');
+const tail = ref(200);
 const content = ref();
 const confirmRef = ref();
 
 const loadHeight = () => {
     let height = globalStore.openMenuTabs ? '405px' : '375px';
-    if (canUpdate()) {
-        height = globalStore.openMenuTabs ? '363px' : '333px';
+    if (!canUpdate()) {
+        height = globalStore.openMenuTabs ? '383px' : '353px';
     }
     return height;
 };
 
 const canUpdate = () => {
-    return activeName.value.indexOf('-log') !== -1;
+    return activeName.value.indexOf('-log') === -1;
 };
 
-const search = async (itemName: string) => {
+const search = async (itemName?: string) => {
+    if (itemName) {
+        tail.value = itemName.indexOf('-log') === -1 ? 0 : 200;
+        activeName.value = itemName;
+    }
     loading.value = true;
-    activeName.value = itemName;
-    await searchClamFile(activeName.value)
+    await searchClamFile(activeName.value, tail.value + '')
         .then((res) => {
             loading.value = false;
             content.value = res.data;
@@ -125,7 +138,7 @@ const onSubmit = async () => {
         .then(() => {
             loading.value = false;
             MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-            search(activeName.value);
+            search();
         })
         .catch(() => {
             loading.value = false;

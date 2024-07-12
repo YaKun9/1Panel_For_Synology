@@ -1,5 +1,11 @@
 <template>
-    <el-drawer :close-on-click-modal="false" :close-on-press-escape="false" v-model="open" size="50%">
+    <el-drawer
+        :destroy-on-close="true"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        v-model="open"
+        size="50%"
+    >
         <template #header>
             <DrawerHeader
                 :header="$t('runtime.' + mode)"
@@ -55,7 +61,7 @@
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item :label="$t('runtime.codeDir')" prop="codeDir">
+                    <el-form-item :label="$t('tool.supervisor.dir')" prop="codeDir">
                         <el-input v-model.trim="runtime.codeDir" :disabled="mode === 'edit'">
                             <template #prepend>
                                 <FileList
@@ -66,13 +72,16 @@
                                 ></FileList>
                             </template>
                         </el-input>
+                        <span class="input-help">
+                            {{ $t('runtime.javaDirHelper') }}
+                        </span>
                     </el-form-item>
                     <el-row :gutter="20">
                         <el-col :span="18">
                             <el-form-item :label="$t('runtime.runScript')" prop="params.EXEC_SCRIPT">
                                 <el-input v-model="runtime.params['EXEC_SCRIPT']"></el-input>
                                 <span class="input-help">
-                                    {{ $t('runtime.customScriptHelper') }}
+                                    {{ $t('runtime.javaScriptHelper') }}
                                 </span>
                             </el-form-item>
                         </el-col>
@@ -224,7 +233,7 @@ watch(
 watch(
     () => runtime.name,
     (newVal) => {
-        if (newVal) {
+        if (newVal && mode.value == 'create') {
             runtime.params['CONTAINER_NAME'] = newVal;
         }
     },

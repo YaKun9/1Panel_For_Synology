@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/1Panel-dev/1Panel/backend/app/dto"
+	"github.com/1Panel-dev/1Panel/backend/constant"
 	"github.com/1Panel-dev/1Panel/backend/global"
 	"github.com/1Panel-dev/1Panel/backend/utils/cmd"
 	"github.com/1Panel-dev/1Panel/backend/utils/copier"
@@ -99,11 +100,15 @@ func (u *DashboardService) LoadBaseInfo(ioOption string, netOption string) (*dto
 		return nil, err
 	}
 	baseInfo.AppInstalledNumber = len(appInstall)
-	dbs, err := mysqlRepo.List()
+	postgresqlDbs, err := postgresqlRepo.List()
 	if err != nil {
 		return nil, err
 	}
-	baseInfo.DatabaseNumber = len(dbs)
+	mysqlDbs, err := mysqlRepo.List()
+	if err != nil {
+		return nil, err
+	}
+	baseInfo.DatabaseNumber = len(mysqlDbs) + len(postgresqlDbs)
 	website, err := websiteRepo.GetBy()
 	if err != nil {
 		return nil, err
@@ -131,7 +136,7 @@ func (u *DashboardService) LoadCurrentInfo(ioOption string, netOption string) *d
 	var currentInfo dto.DashboardCurrent
 	hostInfo, _ := host.Info()
 	currentInfo.Uptime = hostInfo.Uptime
-	currentInfo.TimeSinceUptime = time.Now().Add(-time.Duration(hostInfo.Uptime) * time.Second).Format("2006-01-02 15:04:05")
+	currentInfo.TimeSinceUptime = time.Now().Add(-time.Duration(hostInfo.Uptime) * time.Second).Format(constant.DateTimeLayout)
 	currentInfo.Procs = hostInfo.Procs
 
 	currentInfo.CPUTotal, _ = cpu.Counts(true)
@@ -248,7 +253,7 @@ func loadDiskInfo() []dto.DiskInfo {
 		if isExclude {
 			continue
 		}
-		mounts = append(mounts, diskInfo{Type: fields[1], Device: fields[0], Mount: fields[6]})
+		mounts = append(mounts, diskInfo{Type: fields[1], Device: fields[0], Mount: strings.Join(fields[6:], " ")})
 	}
 
 	var (

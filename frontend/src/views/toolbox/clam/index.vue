@@ -1,6 +1,16 @@
 <template>
     <div>
         <LayoutContent v-loading="loading" v-if="!isRecordShow && !isSettingShow" :title="$t('toolbox.clam.clam')">
+            <template #prompt>
+                <el-alert type="info" :closable="false">
+                    <template #title>
+                        {{ $t('toolbox.clam.clamHelper') }}
+                        <el-link class="ml-1 text-xs" @click="toDoc()" type="primary">
+                            {{ $t('commons.button.helpDoc') }}
+                        </el-link>
+                    </template>
+                </el-alert>
+            </template>
             <template #app>
                 <ClamStatus
                     @setting="setting"
@@ -28,7 +38,7 @@
                     </el-col>
                 </el-row>
             </template>
-            <el-card v-if="!clamStatus.isRunning && maskShow" class="mask-prompt">
+            <el-card v-if="clamStatus.isExist && !clamStatus.isRunning && maskShow" class="mask-prompt">
                 <span>{{ $t('toolbox.clam.notStart') }}</span>
             </el-card>
             <template #main v-if="clamStatus.isExist">
@@ -47,10 +57,39 @@
                         :min-width="60"
                         prop="name"
                         show-overflow-tooltip
-                    />
-                    <el-table-column :label="$t('file.path')" :min-width="120" prop="path" show-overflow-tooltip>
+                    >
                         <template #default="{ row }">
-                            <el-button text type="primary" @click="toFolder(row.path)">{{ row.path }}</el-button>
+                            <el-text type="primary" class="cursor-pointer" @click="onOpenRecord(row)">
+                                {{ row.name }}
+                            </el-text>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        :label="$t('toolbox.clam.scanDir')"
+                        :min-width="120"
+                        prop="path"
+                        show-overflow-tooltip
+                    >
+                        <template #default="{ row }">
+                            <el-button link type="primary" @click="toFolder(row.path)">{{ row.path }}</el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        :label="$t('toolbox.clam.infectedDir')"
+                        :min-width="120"
+                        prop="path"
+                        show-overflow-tooltip
+                    >
+                        <template #default="{ row }">
+                            <el-button
+                                v-if="row.infectedStrategy === 'copy' || row.infectedStrategy === 'move'"
+                                link
+                                type="primary"
+                                @click="toFolder(row.infectedDir + '/1panel-infected/' + row.name)"
+                            >
+                                {{ row.infectedDir + '/1panel-infected/' + row.name }}
+                            </el-button>
+                            <span v-else>-</span>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -75,7 +114,20 @@
             </template>
         </LayoutContent>
 
-        <OpDialog ref="opRef" @search="search" @submit="onSubmitDelete()" />
+        <OpDialog ref="opRef" @search="search" @submit="onSubmitDelete()">
+            <template #content>
+                <el-form class="mt-4 mb-1" ref="deleteForm" label-position="left">
+                    <el-form-item>
+                        <el-checkbox v-model="removeRecord" :label="$t('toolbox.clam.removeRecord')" />
+                        <span class="input-help">{{ $t('toolbox.clam.removeResultHelper') }}</span>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-checkbox v-model="removeInfected" :label="$t('toolbox.clam.removeInfected')" />
+                        <span class="input-help">{{ $t('toolbox.clam.removeInfectedHelper') }}</span>
+                    </el-form-item>
+                </el-form>
+            </template>
+        </OpDialog>
         <OperateDialog @search="search" ref="dialogRef" />
         <LogDialog ref="dialogLogRef" />
         <SettingDialog v-if="isSettingShow" />
@@ -101,7 +153,7 @@ const data = ref();
 const paginationConfig = reactive({
     cacheSizeKey: 'clam-page-size',
     currentPage: 1,
-    pageSize: Number(localStorage.getItem('ftp-page-size')) || 10,
+    pageSize: Number(localStorage.getItem('clam-page-size')) || 10,
     total: 0,
     orderBy: 'created_at',
     order: 'null',
@@ -113,6 +165,9 @@ const dialogRef = ref();
 const operateIDs = ref();
 const dialogLogRef = ref();
 const isRecordShow = ref();
+
+const removeRecord = ref();
+const removeInfected = ref();
 
 const isSettingShow = ref();
 const maskShow = ref(true);
@@ -144,12 +199,14 @@ const setting = () => {
 };
 const getStatus = (status: any) => {
     clamStatus.value = status;
-    console.log(clamStatus.value);
     search();
 };
 
 const toFolder = (folder: string) => {
     router.push({ path: '/hosts/files', query: { path: folder } });
+};
+const toDoc = async () => {
+    window.open('https://1panel.cn/docs/user_manual/toolbox/clam/', '_blank', 'noopener,noreferrer');
 };
 
 const onChange = async (row: any) => {
@@ -157,12 +214,24 @@ const onChange = async (row: any) => {
     MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
 };
 
-const onOpenDialog = async (title: string, rowData: Partial<Toolbox.ClamInfo> = {}) => {
+const onOpenDialog = async (
+    title: string,
+    rowData: Partial<Toolbox.ClamInfo> = {
+        infectedStrategy: 'none',
+    },
+) => {
     let params = {
         title,
         rowData: { ...rowData },
     };
     dialogRef.value!.acceptParams(params);
+};
+const onOpenRecord = (row: Toolbox.ClamInfo) => {
+    isRecordShow.value = true;
+    let params = {
+        rowData: { ...row },
+    };
+    dialogLogRef.value!.acceptParams(params);
 };
 
 const onDelete = async (row: Toolbox.ClamInfo | null) => {
@@ -182,7 +251,7 @@ const onDelete = async (row: Toolbox.ClamInfo | null) => {
         title: i18n.global.t('commons.button.delete'),
         names: names,
         msg: i18n.global.t('commons.msg.operatorHelper', [
-            i18n.global.t('cronjob.cronTask'),
+            i18n.global.t('toolbox.clam.clam'),
             i18n.global.t('commons.button.delete'),
         ]),
         api: null,
@@ -192,7 +261,7 @@ const onDelete = async (row: Toolbox.ClamInfo | null) => {
 
 const onSubmitDelete = async () => {
     loading.value = true;
-    await deleteClam({ ids: operateIDs.value })
+    await deleteClam({ ids: operateIDs.value, removeRecord: removeRecord.value, removeInfected: removeInfected.value })
         .then(() => {
             loading.value = false;
             MsgSuccess(i18n.global.t('commons.msg.deleteSuccess'));
@@ -228,11 +297,7 @@ const buttons = [
     {
         label: i18n.global.t('cronjob.record'),
         click: (row: Toolbox.ClamInfo) => {
-            isRecordShow.value = true;
-            let params = {
-                rowData: { ...row },
-            };
-            dialogLogRef.value!.acceptParams(params);
+            onOpenRecord(row);
         },
     },
     {

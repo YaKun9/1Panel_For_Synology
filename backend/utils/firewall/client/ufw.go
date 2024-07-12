@@ -115,7 +115,13 @@ func (f *Ufw) ListForward() ([]FireInfo, error) {
 
 	var list []FireInfo
 	for _, rule := range rules {
-		dest := strings.SplitN(rule.DestPort, ":", 2)
+		dest := strings.Split(rule.DestPort, ":")
+		if len(dest) < 2 {
+			continue
+		}
+		if len(dest[0]) == 0 {
+			dest[0] = "127.0.0.1"
+		}
 		list = append(list, FireInfo{
 			Num:        rule.Num,
 			Protocol:   rule.Protocol,
@@ -217,7 +223,7 @@ func (f *Ufw) RichRules(rule FireInfo, operation string) error {
 
 	stdout, err := cmd.Exec(ruleStr)
 	if err != nil {
-		if strings.Contains(stdout, "ERROR: Invalid position") {
+		if strings.Contains(stdout, "ERROR: Invalid position") || strings.Contains(stdout, "ERROR: 无效位置") {
 			stdout, err := cmd.Exec(strings.ReplaceAll(ruleStr, "insert 1 ", ""))
 			if err != nil {
 				return fmt.Errorf("%s rich rules (%s), failed, err: %s", operation, ruleStr, stdout)
@@ -264,6 +270,9 @@ func (f *Ufw) loadInfo(line string, fireType string) FireInfo {
 			itemInfo.Strategy = "accept"
 		}
 		if fields[1] == "(v6)" {
+			if fields[2] == "ALLOW" {
+				itemInfo.Strategy = "accept"
+			}
 			itemInfo.Address = fields[4]
 		} else {
 			itemInfo.Address = fields[3]

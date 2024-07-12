@@ -61,7 +61,7 @@
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item :label="$t('runtime.codeDir')" prop="codeDir">
+                    <el-form-item :label="$t('tool.supervisor.dir')" prop="codeDir">
                         <el-input v-model.trim="runtime.codeDir" :disabled="mode === 'edit'">
                             <template #prepend>
                                 <FileList
@@ -72,50 +72,24 @@
                                 ></FileList>
                             </template>
                         </el-input>
+                        <span class="input-help">
+                            {{ $t('runtime.goDirHelper') }}
+                        </span>
                     </el-form-item>
                     <el-row :gutter="20">
                         <el-col :span="18">
                             <el-form-item :label="$t('runtime.runScript')" prop="params.EXEC_SCRIPT">
-                                <el-select
-                                    v-model="runtime.params['EXEC_SCRIPT']"
-                                    v-if="runtime.params['CUSTOM_SCRIPT'] == '0'"
-                                >
-                                    <el-option
-                                        v-for="(script, index) in scripts"
-                                        :key="index"
-                                        :label="script.name + ' 【 ' + script.script + ' 】'"
-                                        :value="script.name"
-                                    >
-                                        <el-row :gutter="10">
-                                            <el-col :span="4">{{ script.name }}</el-col>
-                                            <el-col :span="10">{{ ' 【 ' + script.script + ' 】' }}</el-col>
-                                        </el-row>
-                                    </el-option>
-                                </el-select>
-                                <el-input v-else v-model="runtime.params['EXEC_SCRIPT']"></el-input>
-                                <span class="input-help" v-if="runtime.params['CUSTOM_SCRIPT'] == '0'">
-                                    {{ $t('runtime.runScriptHelper') }}
+                                <el-input v-model="runtime.params['EXEC_SCRIPT']"></el-input>
+                                <span class="input-help">
+                                    {{ $t('runtime.goHelper') }}
                                 </span>
-                                <span class="input-help" v-else>
-                                    {{ $t('runtime.customScriptHelper') }}
-                                </span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item :label="$t('runtime.customScript')" prop="params.CUSTOM_SCRIPT">
-                                <el-switch
-                                    v-model="runtime.params['CUSTOM_SCRIPT']"
-                                    :active-value="'1'"
-                                    :inactive-value="'0'"
-                                    @change="changeScriptType"
-                                />
                             </el-form-item>
                         </el-col>
                     </el-row>
                     <el-row :gutter="20">
                         <el-col :span="7">
-                            <el-form-item :label="$t('runtime.appPort')" prop="params.NODE_APP_PORT">
-                                <el-input v-model.number="runtime.params['NODE_APP_PORT']" />
+                            <el-form-item :label="$t('runtime.appPort')" prop="params.GO_APP_PORT">
+                                <el-input v-model.number="runtime.params['GO_APP_PORT']" />
                                 <span class="input-help">{{ $t('runtime.appPortHelper') }}</span>
                             </el-form-item>
                         </el-col>
@@ -146,7 +120,7 @@
                         <el-col :span="7">
                             <el-form-item
                                 :prop="'exposedPorts.' + index + '.containerPort'"
-                                :rules="rules.params.NODE_APP_PORT"
+                                :rules="rules.params.GO_APP_PORT"
                             >
                                 <el-input v-model.number="port.containerPort" :placeholder="$t('runtime.appPort')" />
                             </el-form-item>
@@ -154,7 +128,7 @@
                         <el-col :span="7">
                             <el-form-item
                                 :prop="'exposedPorts.' + index + '.hostPort'"
-                                :rules="rules.params.NODE_APP_PORT"
+                                :rules="rules.params.GO_APP_PORT"
                             >
                                 <el-input v-model.number="port.hostPort" :placeholder="$t('runtime.externalPort')" />
                             </el-form-item>
@@ -167,26 +141,6 @@
                             </el-form-item>
                         </el-col>
                     </el-row>
-                    <el-form-item :label="$t('runtime.packageManager')" prop="params.PACKAGE_MANAGER">
-                        <el-select v-model="runtime.params['PACKAGE_MANAGER']">
-                            <el-option label="npm" value="npm"></el-option>
-                            <el-option label="yarn" value="yarn"></el-option>
-                            <el-option v-if="hasPnpm" label="pnpm" value="pnpm"></el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item :label="$t('runtime.imageSource')" prop="source">
-                        <el-select v-model="runtime.source" filterable allow-create default-first-option>
-                            <el-option
-                                v-for="(source, index) in imageSources"
-                                :key="index"
-                                :label="source.label + ' [' + source.value + ']'"
-                                :value="source.value"
-                            ></el-option>
-                        </el-select>
-                        <span class="input-help">
-                            {{ $t('runtime.phpsourceHelper') }}
-                        </span>
-                    </el-form-item>
                     <el-form-item :label="$t('app.containerName')" prop="params.CONTAINER_NAME">
                         <el-input v-model.trim="runtime.params['CONTAINER_NAME']"></el-input>
                     </el-form-item>
@@ -208,12 +162,12 @@
 import { App } from '@/api/interface/app';
 import { Runtime } from '@/api/interface/runtime';
 import { GetApp, GetAppDetail, SearchApp } from '@/api/modules/app';
-import { CreateRuntime, GetNodeScripts, GetRuntime, UpdateRuntime } from '@/api/modules/runtime';
+import { CreateRuntime, GetRuntime, UpdateRuntime } from '@/api/modules/runtime';
 import { Rules, checkNumberRange } from '@/global/form-rules';
 import i18n from '@/lang';
 import { MsgError, MsgSuccess } from '@/utils/message';
 import { FormInstance } from 'element-plus';
-import { computed, reactive, ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import DrawerHeader from '@/components/drawer-header/index.vue';
 
 interface OperateRrops {
@@ -230,7 +184,7 @@ const mode = ref('create');
 const editParams = ref<App.InstallParams[]>();
 const appVersions = ref<string[]>([]);
 const appReq = reactive({
-    type: 'node',
+    type: 'go',
     page: 1,
     pageSize: 20,
     resource: 'remote',
@@ -240,19 +194,16 @@ const initData = (type: string) => ({
     appDetailID: undefined,
     image: '',
     params: {
-        PACKAGE_MANAGER: 'npm',
         HOST_IP: '0.0.0.0',
-        CUSTOM_SCRIPT: '0',
     },
     type: type,
     resource: 'appstore',
     rebuild: false,
     codeDir: '/',
-    port: 3000,
-    source: 'https://registry.npmjs.org/',
+    port: 8080,
     exposedPorts: [],
 });
-let runtime = reactive<Runtime.RuntimeCreate>(initData('node'));
+let runtime = reactive<Runtime.RuntimeCreate>(initData('go'));
 const rules = ref<any>({
     name: [Rules.requiredInput, Rules.appName],
     appID: [Rules.requiredSelect],
@@ -260,40 +211,17 @@ const rules = ref<any>({
     port: [Rules.requiredInput, Rules.paramPort, checkNumberRange(1, 65535)],
     source: [Rules.requiredSelect],
     params: {
-        NODE_APP_PORT: [Rules.requiredInput, Rules.paramPort, checkNumberRange(1, 65535)],
-        PACKAGE_MANAGER: [Rules.requiredSelect],
+        GO_APP_PORT: [Rules.requiredInput, Rules.paramPort, checkNumberRange(1, 65535)],
         HOST_IP: [Rules.requiredSelect],
-        EXEC_SCRIPT: [Rules.requiredSelect],
         CONTAINER_NAME: [Rules.requiredInput, Rules.containerName],
+        EXEC_SCRIPT: [Rules.requiredInput],
     },
 });
 const scripts = ref<Runtime.NodeScripts[]>([]);
 const em = defineEmits(['close']);
 
-const hasPnpm = computed(() => {
-    if (runtime.version == undefined) {
-        return false;
-    }
-    return parseFloat(runtime.version) > 18;
-});
-
-const imageSources = [
-    {
-        label: i18n.global.t('runtime.default'),
-        value: 'https://registry.npmjs.org/',
-    },
-    {
-        label: i18n.global.t('runtime.taobao'),
-        value: 'https://registry.npmmirror.com',
-    },
-    {
-        label: i18n.global.t('runtime.tencent'),
-        value: 'https://mirrors.cloud.tencent.com/npm/',
-    },
-];
-
 watch(
-    () => runtime.params['NODE_APP_PORT'],
+    () => runtime.params['GO_APP_PORT'],
     (newVal) => {
         if (newVal && mode.value == 'create') {
             runtime.port = newVal;
@@ -320,14 +248,6 @@ const handleClose = () => {
 
 const getPath = (codeDir: string) => {
     runtime.codeDir = codeDir;
-    getScripts();
-};
-
-const changeScriptType = () => {
-    runtime.params['EXEC_SCRIPT'] = '';
-    if (runtime.params['CUSTOM_SCRIPT'] == '0') {
-        getScripts();
-    }
 };
 
 const addPort = () => {
@@ -339,15 +259,6 @@ const addPort = () => {
 
 const removePort = (index: number) => {
     runtime.exposedPorts.splice(index, 1);
-};
-
-const getScripts = () => {
-    GetNodeScripts({ codeDir: runtime.codeDir }).then((res) => {
-        scripts.value = res.data;
-        if (mode.value == 'create' && scripts.value.length > 0) {
-            runtime.params['EXEC_SCRIPT'] = scripts.value[0].name;
-        }
-    });
 };
 
 const searchApp = (appID: number) => {
@@ -379,9 +290,6 @@ const changeApp = (appID: number) => {
 
 const changeVersion = () => {
     loading.value = true;
-    if (runtime.params['PACKAGE_MANAGER'] == 'pnpm' && !hasPnpm.value) {
-        runtime.params['PACKAGE_MANAGER'] = 'npm';
-    }
     GetAppDetail(runtime.appID, runtime.version, 'runtime')
         .then((res) => {
             runtime.appDetailID = res.data.id;
@@ -412,7 +320,7 @@ const submit = async (formEl: FormInstance | undefined) => {
         if (runtime.exposedPorts && runtime.exposedPorts.length > 0) {
             const containerPortMap = new Map();
             const hostPortMap = new Map();
-            containerPortMap[runtime.params['NODE_APP_PORT']] = true;
+            containerPortMap[runtime.params['GO_APP_PORT']] = true;
             hostPortMap[runtime.port] = true;
             for (const port of runtime.exposedPorts) {
                 if (containerPortMap[port.containerPort]) {
@@ -474,10 +382,6 @@ const getRuntime = async (id: number) => {
         runtime.exposedPorts = data.exposedPorts || [];
         editParams.value = data.appParams;
         searchApp(data.appID);
-        if (data.params['CUSTOM_SCRIPT'] == undefined || data.params['CUSTOM_SCRIPT'] == '0') {
-            data.params['CUSTOM_SCRIPT'] = '0';
-            getScripts();
-        }
         open.value = true;
     } catch (error) {}
 };

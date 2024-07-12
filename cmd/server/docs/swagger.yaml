@@ -218,6 +218,12 @@ definitions:
     type: object
   dto.ClamBaseInfo:
     properties:
+      freshIsActive:
+        type: boolean
+      freshIsExist:
+        type: boolean
+      freshVersion:
+        type: string
       isActive:
         type: boolean
       isExist:
@@ -229,9 +235,44 @@ definitions:
     properties:
       description:
         type: string
+      infectedDir:
+        type: string
+      infectedStrategy:
+        type: string
       name:
         type: string
       path:
+        type: string
+    type: object
+  dto.ClamDelete:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+      removeInfected:
+        type: boolean
+      removeRecord:
+        type: boolean
+    required:
+    - ids
+    type: object
+  dto.ClamFileReq:
+    properties:
+      name:
+        type: string
+      tail:
+        type: string
+    required:
+    - name
+    type: object
+  dto.ClamLogReq:
+    properties:
+      clamName:
+        type: string
+      recordName:
+        type: string
+      tail:
         type: string
     type: object
   dto.ClamLogSearch:
@@ -256,6 +297,10 @@ definitions:
         type: string
       id:
         type: integer
+      infectedDir:
+        type: string
+      infectedStrategy:
+        type: string
       name:
         type: string
       path:
@@ -3089,6 +3134,8 @@ definitions:
         type: string
       group:
         type: string
+      isDetail:
+        type: boolean
       isDir:
         type: boolean
       isHidden:
@@ -3368,6 +3415,8 @@ definitions:
         type: integer
       domains:
         type: string
+      execShell:
+        type: boolean
       expireDate:
         type: string
       id:
@@ -3392,6 +3441,8 @@ definitions:
         type: string
       pushDir:
         type: boolean
+      shell:
+        type: string
       skipDNS:
         type: boolean
       startDate:
@@ -3634,6 +3685,8 @@ definitions:
     type: object
   request.FileContentReq:
     properties:
+      isDetail:
+        type: boolean
       path:
         type: string
     required:
@@ -3738,6 +3791,8 @@ definitions:
       dir:
         type: boolean
       expand:
+        type: boolean
+      isDetail:
         type: boolean
       page:
         type: integer
@@ -4401,6 +4456,8 @@ definitions:
         type: string
       domains:
         type: string
+      execShell:
+        type: boolean
       id:
         type: integer
       keyType:
@@ -4416,6 +4473,8 @@ definitions:
         type: boolean
       renew:
         type: boolean
+      shell:
+        type: string
       sslID:
         type: integer
       time:
@@ -4742,6 +4801,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      sni:
+        type: boolean
     required:
     - id
     - match
@@ -4793,6 +4854,8 @@ definitions:
         type: boolean
       dnsAccountId:
         type: integer
+      execShell:
+        type: boolean
       id:
         type: integer
       keyType:
@@ -4809,6 +4872,8 @@ definitions:
         type: string
       pushDir:
         type: boolean
+      shell:
+        type: string
       skipDNS:
         type: boolean
     required:
@@ -4844,6 +4909,8 @@ definitions:
         type: boolean
       dnsAccountId:
         type: integer
+      execShell:
+        type: boolean
       id:
         type: integer
       keyType:
@@ -4860,6 +4927,8 @@ definitions:
         type: string
       pushDir:
         type: boolean
+      shell:
+        type: string
       skipDNS:
         type: boolean
     required:
@@ -5121,6 +5190,8 @@ definitions:
         type: string
       group:
         type: string
+      isDetail:
+        type: boolean
       isDir:
         type: boolean
       isHidden:
@@ -5162,8 +5233,12 @@ definitions:
         items:
           $ref: '#/definitions/response.FileTree'
         type: array
+      extension:
+        type: string
       id:
         type: string
+      isDir:
+        type: boolean
       name:
         type: string
       path:
@@ -6414,6 +6489,10 @@ paths:
       summary: Load docker status
       tags:
       - Container Docker
+  /containers/download/log:
+    post:
+      description: 下载容器日志
+      responses: {}
   /containers/image:
     get:
       description: 获取镜像名称列表
@@ -12471,7 +12550,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.BatchDeleteReq'
+          $ref: '#/definitions/dto.ClamDelete'
       responses:
         "200":
           description: OK
@@ -12504,7 +12583,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.OperationWithName'
+          $ref: '#/definitions/dto.ClamFileReq'
       responses:
         "200":
           description: OK
@@ -12624,6 +12703,26 @@ paths:
         formatEN: clean clam record [name]
         formatZH: 清空扫描报告 [name]
         paramKeys: []
+  /toolbox/clam/record/log:
+    post:
+      consumes:
+      - application/json
+      description: 获取扫描结果详情
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ClamLogReq'
+      responses:
+        "200":
+          description: OK
+      security:
+      - ApiKeyAuth: []
+      summary: Load clam record detail
+      tags:
+      - Clam
   /toolbox/clam/record/search:
     post:
       consumes:
@@ -13590,6 +13689,39 @@ paths:
         - id
         formatEN: Delete website ca [name]
         formatZH: 删除网站 ca [name]
+        paramKeys: []
+  /websites/ca/download:
+    post:
+      consumes:
+      - application/json
+      description: 下载 CA 证书文件
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.WebsiteResourceReq'
+      responses:
+        "200":
+          description: OK
+      security:
+      - ApiKeyAuth: []
+      summary: Download CA file
+      tags:
+      - Website CA
+      x-panel-log:
+        BeforeFunctions:
+        - db: website_cas
+          input_column: id
+          input_value: id
+          isList: false
+          output_column: name
+          output_value: name
+        bodyKeys:
+        - id
+        formatEN: download ca file [name]
+        formatZH: 下载 CA 证书文件 [name]
         paramKeys: []
   /websites/ca/obtain:
     post:

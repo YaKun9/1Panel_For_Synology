@@ -1,7 +1,7 @@
 <template>
     <div>
         <RouterMenu />
-        <LayoutContent :title="'Node.js'" v-loading="loading">
+        <LayoutContent :title="'Go'" v-loading="loading">
             <template #prompt>
                 <el-alert type="info" :closable="false">
                     <template #title>
@@ -33,7 +33,7 @@
                             </el-text>
                         </template>
                     </el-table-column>
-                    <el-table-column :label="$t('runtime.codeDir')" prop="codeDir">
+                    <el-table-column :label="$t('website.runDir')" prop="codeDir">
                         <template #default="{ row }">
                             <el-button type="primary" link @click="toFolder(row.codeDir)">
                                 <el-icon>
@@ -82,7 +82,7 @@
                     />
                     <fu-table-operations
                         :ellipsis="10"
-                        width="350px"
+                        width="300px"
                         :buttons="buttons"
                         :label="$t('commons.table.operate')"
                         fixed="right"
@@ -91,11 +91,10 @@
                 </ComplexTable>
             </template>
         </LayoutContent>
-        <OperateNode ref="operateRef" @close="search" />
+        <Operate ref="operateRef" @close="search" />
         <Delete ref="deleteRef" @close="search" />
         <ComposeLogs ref="composeLogRef" />
         <PortJumpDialog ref="dialogPortJumpRef" />
-        <Modules ref="moduleRef" />
         <AppResources ref="checkRef" @close="search" />
     </div>
 </template>
@@ -105,12 +104,11 @@ import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { Runtime } from '@/api/interface/runtime';
 import { OperateRuntime, RuntimeDeleteCheck, SearchRuntimes, SyncRuntime } from '@/api/modules/runtime';
 import { dateFormat } from '@/utils/util';
-import OperateNode from '@/views/website/runtime/node/operate/index.vue';
+import Operate from '@/views/website/runtime/go/operate/index.vue';
 import Status from '@/components/status/index.vue';
 import Delete from '@/views/website/runtime/delete/index.vue';
 import i18n from '@/lang';
 import RouterMenu from '../index.vue';
-import Modules from '@/views/website/runtime/node/module/index.vue';
 import router from '@/routers/router';
 import ComposeLogs from '@/components/compose-log/index.vue';
 import { Promotion } from '@element-plus/icons-vue';
@@ -127,7 +125,6 @@ const operateRef = ref();
 const deleteRef = ref();
 const dialogPortJumpRef = ref();
 const composeLogRef = ref();
-const moduleRef = ref();
 const checkRef = ref();
 
 const paginationConfig = reactive({
@@ -140,18 +137,9 @@ const req = reactive<Runtime.RuntimeReq>({
     name: '',
     page: 1,
     pageSize: 40,
-    type: 'node',
+    type: 'go',
 });
 const buttons = [
-    {
-        label: i18n.global.t('runtime.module'),
-        click: function (row: Runtime.Runtime) {
-            openModules(row);
-        },
-        disabled: function (row: Runtime.Runtime) {
-            return row.status === 'recreating' || row.status === 'stopped';
-        },
-    },
     {
         label: i18n.global.t('container.stop'),
         click: function (row: Runtime.Runtime) {
@@ -214,12 +202,8 @@ const sync = () => {
     SyncRuntime();
 };
 
-const openModules = (row: Runtime.Runtime) => {
-    moduleRef.value.acceptParams({ id: row.id, packageManager: row.params['PACKAGE_MANAGER'] });
-};
-
 const openCreate = () => {
-    operateRef.value.acceptParams({ type: 'node', mode: 'create' });
+    operateRef.value.acceptParams({ type: 'go', mode: 'create' });
 };
 
 const openDetail = (row: Runtime.Runtime) => {
