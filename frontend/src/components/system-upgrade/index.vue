@@ -14,24 +14,14 @@
             </el-button>
             <el-divider direction="vertical" />
         </span>
-        <el-button type="primary" link @click="toHalo">
+        <el-button type="primary" link @click="toGithub">
             <span class="font-normal">{{ isProductPro ? $t('license.pro') : $t('license.community') }}</span>
         </el-button>
         <span class="version">{{ version }}</span>
-        <el-badge is-dot style="margin-top: -3px" v-if="version !== 'Waiting' && globalStore.hasNewVersion">
-            <el-button type="primary" link @click="onLoadUpgradeInfo">
-                <span class="font-normal">({{ $t('setting.hasNewVersion') }})</span>
-            </el-button>
-        </el-badge>
-        <el-button
-            v-if="version !== 'Waiting' && !globalStore.hasNewVersion"
-            type="primary"
-            link
-            @click="onLoadUpgradeInfo"
-        >
+
+        <el-button type="primary" link @click="onLoadUpgradeInfo">
             <span>({{ $t('setting.upgradeCheck') }})</span>
         </el-button>
-        <el-tag v-if="version === 'Waiting'" round style="margin-left: 10px">{{ $t('setting.upgrading') }}</el-tag>
     </div>
     <el-drawer
         :close-on-click-modal="false"
@@ -129,6 +119,8 @@ const toGithub = () => {
 };
 
 const onLoadUpgradeInfo = async () => {
+    window.open('https://github.com/YaKun9/1Panel_For_Synology/releases', '_blank', 'noopener,noreferrer');
+    return;
     loading.value = true;
     await loadUpgradeInfo()
         .then((res) => {
