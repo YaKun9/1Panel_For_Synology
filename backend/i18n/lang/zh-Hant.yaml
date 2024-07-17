@@ -75,7 +75,7 @@ ErrFileToLarge: "文件超過10M,無法打開"
 ErrPathNotFound: "目錄不存在"
 ErrMovePathFailed: "目標路徑不能包含原路徑！"
 ErrLinkPathNotFound: "目標路徑不存在!"
-ErrFileIsExit: "文件或文件夾已存在！"
+ErrFileIsExist: "文件或文件夾已存在！"
 ErrFileUpload: "{{ .name }} 上傳文件失敗 {{ .detail}}"
 ErrFileDownloadDir: "不支持下載文件夾"
 ErrCmdNotFound: "{{ .name}} 命令不存在，請先在宿主機安裝此命令"
@@ -175,6 +175,7 @@ CutWebsiteLogSuccess: "{{ .name }} 網站日誌切割成功，備份路徑 {{ .p
 #toolbox
 ErrNotExistUser: "當前使用者不存在，請修改後重試！"
 ErrBanAction: "設置失敗，當前 {{ .name }} 服務不可用，請檢查後重試！"
+ErrClamdscanNotFound: "未偵測到 clamdscan 指令，請參考文件安裝！"
 
 #waf
 ErrScope: "不支援修改此配置"
