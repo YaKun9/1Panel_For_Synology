@@ -68,6 +68,7 @@ const message = {
             createNewFolder: '新建文件夹',
             createNewFile: '新建文件',
             helpDoc: '帮助文档',
+            unbind: '解绑',
         },
         search: {
             timeStart: '开始时间',
@@ -424,6 +425,10 @@ const message = {
         remote: '远程',
         remoteDB: '远程服务器',
         createRemoteDB: '添加远程服务器',
+        unBindRemoteDB: '解绑远程服务器',
+        unBindForce: '强制解绑',
+        unBindForceHelper: '忽略解绑过程中的所有错误，确保最终操作成功',
+        unBindRemoteHelper: '解绑远程数据库只会删除绑定关系，不会直接删除远程数据库',
         editRemoteDB: '编辑远程服务器',
         localDB: '本地数据库',
         address: '数据库地址',
@@ -1020,6 +1025,11 @@ const message = {
         },
         clam: {
             clam: '病毒扫描',
+            cron: '定时扫描',
+            cronHelper: '专业版支持定时扫描功能 ',
+            specErr: '执行周期格式错误，请检查后重试！',
+            disableMsg: '停止定时执行会导致该扫描任务不再自动执行。是否继续？',
+            enableMsg: '启用定时执行会让该扫描任务定期自动执行。是否继续？',
             showFresh: '显示病毒库服务',
             hideFresh: '隐藏病毒库服务',
             clamHelper:
@@ -1393,6 +1403,7 @@ const message = {
         recoverDetail: '恢复详情',
         createSnapshot: '创建快照',
         importSnapshot: '同步快照',
+        importHelper: '快照文件目录：',
         recover: '恢复',
         lastRecoverAt: '上次恢复时间',
         lastRollbackAt: '上次回滚时间',

@@ -260,7 +260,13 @@
                     <el-table-column :label="$t('file.size')" prop="size" max-width="50" sortable>
                         <template #default="{ row, $index }">
                             <span v-if="row.isDir">
-                                <el-button type="primary" link small @click="getDirSize(row, $index)">
+                                <el-button
+                                    type="primary"
+                                    link
+                                    small
+                                    @click="getDirSize(row, $index)"
+                                    :loading="btnLoading.includes($index)"
+                                >
                                     <span v-if="row.dirSize == undefined">
                                         {{ $t('file.calculate') }}
                                     </span>
@@ -381,6 +387,7 @@ const initData = () => ({
 });
 let req = reactive(initData());
 let loading = ref(false);
+let btnLoading = ref([]);
 const paths = ref<FilePaths[]>([]);
 let pathWidth = ref(0);
 const history: string[] = [];
@@ -631,7 +638,7 @@ const getDirSize = async (row: any, index: number) => {
     const req = {
         path: row.path,
     };
-    loading.value = true;
+    btnLoading.value.push(index);
     await ComputeDirSize(req)
         .then(async (res) => {
             let newData = [...data.value];
@@ -639,7 +646,7 @@ const getDirSize = async (row: any, index: number) => {
             data.value = newData;
         })
         .finally(() => {
-            loading.value = false;
+            btnLoading.value = btnLoading.value.filter((item) => item !== index);
         });
 };
 
@@ -688,7 +695,7 @@ const openDeCompress = (item: File.File) => {
 const openView = (item: File.File) => {
     const fileType = getFileType(item.extension);
 
-    const previewTypes = ['image', 'video', 'audio', 'pdf', 'word', 'excel'];
+    const previewTypes = ['image', 'video', 'audio', 'word', 'excel'];
     if (previewTypes.includes(fileType)) {
         return openPreview(item, fileType);
     }

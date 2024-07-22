@@ -69,6 +69,7 @@ const message = {
             createNewFolder: 'Create new folder',
             createNewFile: 'Create new file',
             helpDoc: 'Help Document',
+            unbind: 'UnBind',
         },
         search: {
             timeStart: 'Time start',
@@ -437,6 +438,11 @@ const message = {
         remote: 'Remote',
         remoteDB: 'Remote DB',
         createRemoteDB: 'Create Remote Server',
+        unBindRemoteDB: 'Unbind remote server',
+        unBindForce: 'Force unbind',
+        unBindForceHelper: 'Ignore all errors during the unbinding process to ensure the final operation is successful',
+        unBindRemoteHelper:
+            'Unbinding the remote database will only remove the binding relationship and will not directly delete the remote database',
         editRemoteDB: 'Edit Remote Server',
         localDB: 'Local DB',
         address: 'DB address',
@@ -1077,6 +1083,13 @@ const message = {
         },
         clam: {
             clam: 'Virus Scan',
+            cron: 'Scheduled scan',
+            cronHelper: 'Professional version supports scheduled scan feature',
+            specErr: 'Execution schedule format error, please check and retry!',
+            disableMsg:
+                'Stopping scheduled execution will prevent this scan task from running automatically. Do you want to continue?',
+            enableMsg:
+                'Enabling scheduled execution will allow this scan task to run automatically at regular intervals. Do you want to continue?',
             showFresh: 'Show Virus Database Service',
             hideFresh: 'Hide Virus Database Service',
             clamHelper:
@@ -1572,6 +1585,7 @@ const message = {
         recoverDetail: 'Recover detail',
         createSnapshot: 'Create Snapshot',
         importSnapshot: 'Sync Snapshot',
+        importHelper: 'Snapshot directory:',
         recover: 'Recover',
         lastRecoverAt: 'Last recovery time',
         lastRollbackAt: 'Last rollback time',
