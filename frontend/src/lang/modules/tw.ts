@@ -68,6 +68,7 @@ const message = {
             createNewFolder: '新建資料夾',
             createNewFile: '新建檔案',
             helpDoc: '幫助文档',
+            unbind: '解綁',
         },
         search: {
             timeStart: '開始時間',
@@ -1023,6 +1024,11 @@ const message = {
         },
         clam: {
             clam: '病毒掃描',
+            cron: '定時掃描',
+            cronHelper: '專業版支持定時掃描功能',
+            specErr: '執行周期格式錯誤，請檢查後重試！',
+            disableMsg: '停止定時執行會導致該掃描任務不再自動執行。是否繼續？',
+            enableMsg: '啟用定時執行會讓該掃描任務定期自動執行。是否繼續？',
             showFresh: '顯示病毒庫服務',
             hideFresh: '隱藏病毒庫服務',
             clamHelper:
@@ -1395,6 +1401,7 @@ const message = {
         recoverDetail: '恢復詳情',
         createSnapshot: '創建快照',
         importSnapshot: '同步快照',
+        importHelper: '快照文件目錄：',
         recover: '恢復',
         lastRecoverAt: '上次恢復時間',
         lastRollbackAt: '上次回滾時間',
