@@ -102,10 +102,6 @@ const handleClose = () => {
     drawerVisible.value = false;
 };
 
-const toHalo = () => {
-    window.open('https://www.lxware.cn/1panel' + '', '_blank', 'noopener,noreferrer');
-};
-
 const toDoc = () => {
     window.open('https://1panel.cn/docs/', '_blank', 'noopener,noreferrer');
 };
