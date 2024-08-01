@@ -51,7 +51,8 @@ curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_
 - [JumpServer](https://github.com/jumpserver/jumpserver/) - 广受欢迎的开源堡垒机
 - [Halo](https://github.com/halo-dev/halo/) - 强大易用的开源建站工具
 - [DataEase](https://github.com/dataease/dataease/) - 人人可用的开源数据可视化分析工具
-- [MeterSphere](https://github.com/metersphere/metersphere/) - 开源自动化测试平台
+- [MeterSphere](https://github.com/metersphere/metersphere/) - 开源持续测试工具
+- [KubePi](https://github.com/1Panel-dev/KubePi/) - 现代化、开源的 K8s 面板
 
 ## License
 
