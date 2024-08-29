@@ -2,18 +2,16 @@
 # Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
-    # - export NODE_OPTIONS="--max-old-space-size=8192"
-    # - make build_web
     - chmod +x ./script.sh
     - ./script.sh
     - sed -i 's@ORIGINAL_VERSION=.*@ORIGINAL_VERSION=v{{ .Version }}@g' 1pctl
+    - sed -i 's@BASE_DIR=.*@BASE_DIR=/volume2/MX500/Panel@g' 1pctl
     - go mod tidy
     
 builds:
   - main: ./cmd/server/main.go
     binary: 1panel
     flags:
-      - -tags=xpack
       - -trimpath
     ldflags:
       - -w -s
@@ -21,14 +19,8 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-    goarm:
-      - 7
     goarch:
       - amd64
-      - arm64
-      - arm
-      - ppc64le
-      - s390x
 
 archives:
   - format: tar.gz

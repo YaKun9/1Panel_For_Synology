@@ -231,7 +231,7 @@ func recoverDaemonJson(src string, fileOp files.FileOp) error {
 		}
 	}
 
-	_, _ = cmd.Exec("systemctl restart docker")
+	_, _ = cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 	return nil
 }
 

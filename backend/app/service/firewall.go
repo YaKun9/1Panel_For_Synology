@@ -188,19 +188,19 @@ func (u *FirewallService) OperateFirewall(operation string) error {
 			_ = client.Stop()
 			return err
 		}
-		_, _ = cmd.Exec("systemctl restart docker")
+		_, _ = cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 		return nil
 	case "stop":
 		if err := client.Stop(); err != nil {
 			return err
 		}
-		_, _ = cmd.Exec("systemctl restart docker")
+		_, _ = cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 		return nil
 	case "restart":
 		if err := client.Restart(); err != nil {
 			return err
 		}
-		_, _ = cmd.Exec("systemctl restart docker")
+		_, _ = cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 		return nil
 	case "disablePing":
 		return u.updatePingStatus("0")

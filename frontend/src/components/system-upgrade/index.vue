@@ -14,7 +14,7 @@
             </el-button>
             <el-divider direction="vertical" />
         </span>
-        <el-button type="primary" link @click="toHalo">
+        <el-button type="primary" link @click="toGithub">
             <span class="font-normal">{{ isProductPro ? $t('license.pro') : $t('license.community') }}</span>
         </el-button>
         <span class="version" @click="copyText(version)">{{ version }}</span>
@@ -31,7 +31,6 @@
         >
             <span>({{ $t('setting.upgradeCheck') }})</span>
         </el-button>
-        <el-tag v-if="version === 'Waiting'" round style="margin-left: 10px">{{ $t('setting.upgrading') }}</el-tag>
     </div>
     <el-drawer
         :close-on-click-modal="false"
@@ -113,10 +112,6 @@ const handleClose = () => {
     drawerVisible.value = false;
 };
 
-const toHalo = () => {
-    window.open('https://www.lxware.cn/1panel' + '', '_blank', 'noopener,noreferrer');
-};
-
 const toDoc = () => {
     window.open('https://1panel.cn/docs/', '_blank', 'noopener,noreferrer');
 };
@@ -126,10 +121,12 @@ const toForum = () => {
 };
 
 const toGithub = () => {
-    window.open('https://github.com/1Panel-dev/1Panel', '_blank', 'noopener,noreferrer');
+    window.open('https://github.com/yakun9/1panel_For_Synology', '_blank', 'noopener,noreferrer');
 };
 
 const onLoadUpgradeInfo = async () => {
+    window.open('https://github.com/YaKun9/1Panel_For_Synology/releases', '_blank', 'noopener,noreferrer');
+    return;
     loading.value = true;
     await loadUpgradeInfo()
         .then((res) => {

@@ -212,7 +212,7 @@ func (u *DockerService) UpdateConf(req dto.SettingUpdate) error {
 		return err
 	}
 
-	stdout, err := cmd.Exec("systemctl restart docker")
+	stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 	if err != nil {
 		return errors.New(string(stdout))
 	}
@@ -258,7 +258,7 @@ func (u *DockerService) UpdateLogOption(req dto.LogOption) error {
 		return err
 	}
 
-	stdout, err := cmd.Exec("systemctl restart docker")
+	stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 	if err != nil {
 		return errors.New(string(stdout))
 	}
@@ -298,7 +298,7 @@ func (u *DockerService) UpdateIpv6Option(req dto.Ipv6Option) error {
 		return err
 	}
 
-	stdout, err := cmd.Exec("systemctl restart docker")
+	stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 	if err != nil {
 		return errors.New(string(stdout))
 	}
@@ -327,7 +327,7 @@ func (u *DockerService) UpdateConfByFile(req dto.DaemonJsonUpdateByFile) error {
 	_, _ = write.WriteString(req.File)
 	write.Flush()
 
-	stdout, err := cmd.Exec("systemctl restart docker")
+	stdout, err := cmd.Exec("systemctl restart pkg-ContainerManager-dockerd")
 	if err != nil {
 		return errors.New(string(stdout))
 	}
