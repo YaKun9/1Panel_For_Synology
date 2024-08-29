@@ -92,6 +92,8 @@ func (c *ClamService) LoadBaseInfo() (dto.ClamBaseInfo, error) {
 				baseInfo.Version = strings.TrimPrefix(version, "ClamAV ")
 			}
 		}
+	} else {
+		_ = StopAllCronJob(false)
 	}
 	if baseInfo.FreshIsActive {
 		version, err := cmd.Exec("freshclam --version")
@@ -139,7 +141,7 @@ func (c *ClamService) SearchWithPage(req dto.SearchClamWithPage) (int64, interfa
 		item.LastHandleDate = "-"
 		datas = append(datas, item)
 	}
-	nyc, _ := time.LoadLocation(common.LoadTimeZone())
+	nyc, _ := time.LoadLocation(common.LoadTimeZoneByCmd())
 	for i := 0; i < len(datas); i++ {
 		logPaths := loadFileByName(datas[i].Name)
 		sort.Slice(logPaths, func(i, j int) bool {
@@ -268,7 +270,7 @@ func (c *ClamService) Delete(req dto.ClamDelete) error {
 }
 
 func (c *ClamService) HandleOnce(req dto.OperateByID) error {
-	if cmd.Which("clamdscan") == false {
+	if cleaned := StopAllCronJob(true); cleaned {
 		return buserr.New("ErrClamdscanNotFound")
 	}
 	clam, _ := clamRepo.Get(commonRepo.WithByID(req.ID))
@@ -321,7 +323,7 @@ func (c *ClamService) LoadRecords(req dto.ClamLogSearch) (int64, interface{}, er
 	}
 
 	var filterFiles []string
-	nyc, _ := time.LoadLocation(common.LoadTimeZone())
+	nyc, _ := time.LoadLocation(common.LoadTimeZoneByCmd())
 	for _, item := range logPaths {
 		t1, err := time.ParseInLocation(constant.DateTimeSlimLayout, item, nyc)
 		if err != nil {
@@ -471,6 +473,29 @@ func (c *ClamService) UpdateFile(req dto.UpdateByNameAndFile) error {
 
 	_ = systemctl.Restart(service)
 	return nil
+}
+
+func StopAllCronJob(withCheck bool) bool {
+	if withCheck {
+		isActive := false
+		exist1, _ := systemctl.IsExist(clamServiceNameCentOs)
+		if exist1 {
+			isActive, _ = systemctl.IsActive(clamServiceNameCentOs)
+		}
+		exist2, _ := systemctl.IsExist(clamServiceNameUbuntu)
+		if exist2 {
+			isActive, _ = systemctl.IsActive(clamServiceNameUbuntu)
+		}
+		if isActive {
+			return false
+		}
+	}
+	clams, _ := clamRepo.List(commonRepo.WithByStatus(constant.StatusEnable))
+	for i := 0; i < len(clams); i++ {
+		global.Cron.Remove(cron.EntryID(clams[i].EntryID))
+		_ = clamRepo.Update(clams[i].ID, map[string]interface{}{"status": constant.StatusDisable, "entry_id": 0})
+	}
+	return true
 }
 
 func loadFileByName(name string) []string {

@@ -17,9 +17,18 @@
         <el-button type="primary" link @click="toGithub">
             <span class="font-normal">{{ isProductPro ? $t('license.pro') : $t('license.community') }}</span>
         </el-button>
-        <span class="version">{{ version }}</span>
-
-        <el-button type="primary" link @click="onLoadUpgradeInfo">
+        <span class="version" @click="copyText(version)">{{ version }}</span>
+        <el-badge is-dot style="margin-top: -3px" v-if="version !== 'Waiting' && globalStore.hasNewVersion">
+            <el-button type="primary" link @click="onLoadUpgradeInfo">
+                <span class="font-normal">({{ $t('setting.hasNewVersion') }})</span>
+            </el-button>
+        </el-badge>
+        <el-button
+            v-if="version !== 'Waiting' && !globalStore.hasNewVersion"
+            type="primary"
+            link
+            @click="onLoadUpgradeInfo"
+        >
             <span>({{ $t('setting.upgradeCheck') }})</span>
         </el-button>
     </div>
@@ -71,6 +80,7 @@ import MdEditor from 'md-editor-v3';
 import i18n from '@/lang';
 import 'md-editor-v3/lib/style.css';
 import { MsgSuccess } from '@/utils/message';
+import { copyText } from '@/utils/util';
 import { onMounted, ref } from 'vue';
 import { GlobalStore } from '@/store';
 import { ElMessageBox } from 'element-plus';
@@ -178,6 +188,7 @@ onMounted(() => {
     color: var(--dark-gold-base-color);
     text-decoration: none;
     letter-spacing: 0.5px;
+    cursor: pointer;
 }
 .line-height {
     line-height: 25px;

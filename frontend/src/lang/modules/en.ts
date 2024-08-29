@@ -191,7 +191,7 @@ const message = {
             simpleName: 'Supports non-underscore starting, English, numbers, _, length 3-30',
             simplePassword: 'Supports non-underscore starting, English, numbers, _, length 1-30',
             dbName: 'Supports non-special character starting, including English, Chinese, numbers, .-_, with a length of 1-64',
-            imageName: 'Support English, numbers, :/.-_, length 1-150',
+            imageName: 'Support English, numbers, :@/.-_, length 1-256',
             volumeName: 'Support English, numbers, .-_, length 2-30',
             supervisorName: 'Supports non-special characters starting with English, numbers, - and _, length 1-128',
             complexityPassword:
@@ -1524,6 +1524,7 @@ const message = {
         allowIPEgs:
             'If multiple ip authorizations exist, newlines need to be displayed. For example, \n172.16.10.111 \n172.16.10.0/24',
         mfa: 'MFA',
+        mfaClose: 'Disabling MFA will reduce the security of the service. Do you want to continue?',
         secret: 'Secret',
         mfaInterval: 'Refresh interval (s)',
         mfaTitleHelper:
@@ -1572,7 +1573,7 @@ const message = {
         status: 'Snapshot status',
         ignoreRule: 'Ignore Rule',
         ignoreHelper:
-            'This rule will be used to compress and backup the 1Panel data directory during snapshots, please modify with caution.',
+            'This rule will be used to compress and backup the 1Panel data directory during snapshots, with socket files ignored by default.',
         ignoreHelper1: 'One item per line, e.g.: \n*.log\n/opt/1panel/cache',
         panelInfo: 'Write 1Panel basic information',
         panelBin: 'Backup 1Panel system files',
@@ -1680,6 +1681,7 @@ const message = {
             'Upgrading to the professional version allows customization of panel logo, welcome message, and other information.',
         monitor:
             'Upgrade to the professional version to view the real-time status of the website, visitor trends, visitor sources, request logs and other information. ',
+        alert: 'Upgrade to the professional version to receive alarm information via SMS and view alarm logs, fully control various key events, and ensure worry-free system operation',
     },
     clean: {
         scan: 'Start Scanning',
@@ -1829,7 +1831,7 @@ const message = {
         appHelper: 'Please view the installation instructions of some applications on the application details page',
         backupApp: 'Backup application before upgrade',
         backupAppHelper:
-            'If the upgrade fails, the backup will be automatically rolled back. Please check the failure reason in the log audit-system log',
+            'If the upgrade fails, the backup will be automatically rolled back. Please check the failure reason in the log audit-system log. The backup will retain the latest 3 copies by default',
         delete: 'Delete',
         openrestyDeleteHelper:
             'Forcibly deleting OpenResty will delete all websites, please confirm the risk before operation',

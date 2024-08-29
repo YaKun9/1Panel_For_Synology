@@ -42,7 +42,7 @@
 
         <el-row :gutter="20" style="margin-top: 20px">
             <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
-                <CardWithHeader :header="$t('home.overview')" height="146px">
+                <CardWithHeader :header="$t('home.overview')" height="166px">
                     <template #body>
                         <div class="h-overview">
                             <el-row>
@@ -80,7 +80,7 @@
                 </CardWithHeader>
                 <CardWithHeader :header="$t('commons.table.status')" style="margin-top: 20px">
                     <template #body>
-                        <Status ref="statusRef" style="margin-top: -7px" />
+                        <Status ref="statusRef" style="margin-bottom: 33px" />
                     </template>
                 </CardWithHeader>
                 <CardWithHeader :header="$t('menu.monitor')" style="margin-top: 20px; margin-bottom: 20px">
@@ -209,6 +209,28 @@
                                     </template>
                                     {{ baseInfo.kernelArch }}
                                 </el-descriptions-item>
+                                <el-descriptions-item
+                                    v-if="baseInfo.ipv4Addr && baseInfo.ipv4Addr !== 'IPNotFound'"
+                                    class-name="system-content"
+                                >
+                                    <template #label>
+                                        <span class="system-label">
+                                            {{ $t('home.ip') }}
+                                        </span>
+                                    </template>
+                                    {{ baseInfo.ipv4Addr }}
+                                </el-descriptions-item>
+                                <el-descriptions-item
+                                    v-if="baseInfo.systemProxy && baseInfo.systemProxy !== 'noProxy'"
+                                    class-name="system-content"
+                                >
+                                    <template #label>
+                                        <span class="system-label">
+                                            {{ $t('home.proxy') }}
+                                        </span>
+                                    </template>
+                                    {{ baseInfo.systemProxy }}
+                                </el-descriptions-item>
                                 <el-descriptions-item class-name="system-content">
                                     <template #label>
                                         <span class="system-label">
@@ -303,7 +325,8 @@ const baseInfo = ref<Dashboard.BaseInfo>({
     kernelArch: '',
     kernelVersion: '',
     virtualizationSystem: '',
-
+    ipv4Addr: '',
+    systemProxy: '',
     cpuCores: 0,
     cpuLogicalCores: 0,
     cpuModelName: '',
@@ -611,7 +634,7 @@ onBeforeUnmount(() => {
 
 .h-systemInfo {
     margin-left: 18px;
-    height: 216px;
+    height: 276px;
 }
 @-moz-document url-prefix() {
     .h-systemInfo {

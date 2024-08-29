@@ -141,6 +141,10 @@ func (u *MysqlService) Create(ctx context.Context, req dto.MysqlDBCreate) (*mode
 }
 
 func (u *MysqlService) BindUser(req dto.BindUser) error {
+	if cmd.CheckIllegal(req.Username, req.Password, req.Permission) {
+		return buserr.New(constant.ErrCmdIllegal)
+	}
+
 	dbItem, err := mysqlRepo.Get(mysqlRepo.WithByMysqlName(req.Database), commonRepo.WithByName(req.DB))
 	if err != nil {
 		return err
@@ -533,7 +537,10 @@ func (u *MysqlService) LoadStatus(req dto.OperationWithNameAndType) (*dto.MysqlS
 	info.Position = "OFF"
 	rows, err := executeSqlForRows(app.ContainerName, app.Key, app.Password, "show master status;")
 	if err != nil {
-		return nil, err
+		rows, err = executeSqlForRows(app.ContainerName, app.Key, app.Password, "SHOW BINARY LOG STATUS;")
+		if err != nil {
+			return nil, err
+		}
 	}
 	if len(rows) > 2 {
 		itemValue := strings.Split(rows[1], "\t")

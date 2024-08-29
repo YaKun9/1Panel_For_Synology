@@ -29,6 +29,7 @@ build/1panel
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+
 # Dependency directories
 /pkg/
 backend/__debug_bin
@@ -40,9 +41,7 @@ frontend/auto-imports.d.ts
 frontend/components.d.ts
 frontend/src/xpack
 backend/xpack
-backend/router/entry_xpack.go
-backend/server/init_xpack.go
-backend/utils/xpack/xpack_xpack.go
+*_xpack.go
 
 .history/
 dist/

@@ -535,6 +535,12 @@ func (a *AppInstallService) GetUpdateVersions(req request.AppUpdateVersion) ([]d
 			if err != nil {
 				return versions, err
 			}
+			if app.Key == constant.AppMysql {
+				majorVersion := getMajorVersion(install.Version)
+				if !strings.HasPrefix(detail.Version, majorVersion) {
+					continue
+				}
+			}
 			versions = append(versions, dto.AppVersion{
 				Version:       detail.Version,
 				DetailId:      detail.ID,
@@ -703,6 +709,22 @@ func (a *AppInstallService) GetParams(id uint) (*response.AppConfig, error) {
 					}
 				}
 				appParam.Values = form.Values
+			} else if form.Type == "apps" {
+				if m, ok := form.Child.(map[string]interface{}); ok {
+					result := make(map[string]string)
+					for key, value := range m {
+						if strVal, ok := value.(string); ok {
+							result[key] = strVal
+						}
+					}
+					if envKey, ok := result["envKey"]; ok {
+						serviceName := envs[envKey]
+						if serviceName != nil {
+							appInstall, _ := appInstallRepo.GetFirst(appInstallRepo.WithServiceName(serviceName.(string)))
+							appParam.ShowValue = appInstall.Name
+						}
+					}
+				}
 			}
 			params = append(params, appParam)
 		} else {

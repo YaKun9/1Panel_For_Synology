@@ -94,6 +94,7 @@ ErrPathPermission: 'index 目录下检测到非 1000:1000 权限文件夹，可�
 ErrDomainIsUsed: "域名已被网站【{{ .name }}】使用"
 ErrDomainFormat: "{{ .name }} 域名格式不正确"
 ErrDefaultAlias: "default 为保留代号，请使用其他代号"
+ErrImageNotExist: "运行环境 {{.name}} 镜像不存在，请重新编辑运行环境"
 
 #ssl
 ErrSSLCannotDelete: "{{ .name }} 证书正在被网站使用，无法删除"
@@ -199,4 +200,11 @@ ErrLicenseSync: "许可证信息同步失败，数据库中未检测到许可证
 ErrXpackNotFound: "该部分为专业版功能，请先在 面板设置-许可证 界面导入许可证"
 ErrXpackNotActive: "该部分为专业版功能，请先在 面板设置-许可证 界面同步许可证状态"
 ErrXpackOutOfDate: "当前许可证已过期，请重新在 面板设置-许可证 界面导入许可证"
+
+#license
+ErrAlert: "告警信息格式错误，请检查后重试！"
+ErrAlertPush: "告警信息推送错误，请检查后重试！"
+ErrAlertSave: "告警信息保存错误，请检查后重试！"
+ErrAlertSync: "告警信息同步错误，请检查后重试！"
+ErrAlertRemote: "告警信息远端错误，请检查后重试！"
 

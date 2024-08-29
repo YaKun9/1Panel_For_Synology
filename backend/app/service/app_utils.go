@@ -186,17 +186,18 @@ func createLink(ctx context.Context, app model.App, appInstall *model.AppInstall
 			}
 		case constant.AppRedis:
 			if password, ok := params["PANEL_REDIS_ROOT_PASSWORD"]; ok {
-				if password != "" {
-					authParam := dto.RedisAuthParam{
-						RootPassword: password.(string),
-					}
-					authByte, err := json.Marshal(authParam)
-					if err != nil {
-						return err
-					}
-					appInstall.Param = string(authByte)
+				authParam := dto.RedisAuthParam{
+					RootPassword: "",
 				}
-				database.Password = password.(string)
+				if password != "" {
+					authParam.RootPassword = password.(string)
+					database.Password = password.(string)
+				}
+				authByte, err := json.Marshal(authParam)
+				if err != nil {
+					return err
+				}
+				appInstall.Param = string(authByte)
 			}
 		}
 		if err := databaseRepo.Create(ctx, database); err != nil {
@@ -516,8 +517,19 @@ func upgradeInstall(req request.AppInstallUpgrade) error {
 		)
 		global.LOG.Infof(i18n.GetMsgWithName("UpgradeAppStart", install.Name, nil))
 		if req.Backup {
-			backupRecord, err := NewIBackupService().AppBackup(dto.CommonBackup{Name: install.App.Key, DetailName: install.Name})
+			iBackUpService := NewIBackupService()
+			fileName := fmt.Sprintf("upgrade_backup_%s_%s.tar.gz", install.Name, time.Now().Format(constant.DateTimeSlimLayout)+common.RandStrAndNum(5))
+			backupRecord, err := iBackUpService.AppBackup(dto.CommonBackup{Name: install.App.Key, DetailName: install.Name, FileName: fileName})
 			if err == nil {
+				backups, _ := iBackUpService.ListAppRecords(install.App.Key, install.Name, "upgrade_backup")
+				if len(backups) > 3 {
+					backupsToDelete := backups[:len(backups)-3]
+					var deleteIDs []uint
+					for _, backup := range backupsToDelete {
+						deleteIDs = append(deleteIDs, backup.ID)
+					}
+					_ = iBackUpService.BatchDeleteRecord(deleteIDs)
+				}
 				localDir, err := loadLocalDir()
 				if err == nil {
 					backupFile = path.Join(localDir, backupRecord.FileDir, backupRecord.FileName)
@@ -1224,6 +1236,31 @@ func synAppInstall(containers map[string]types.Container, appInstall *model.AppI
 	_ = appInstallRepo.Save(context.Background(), appInstall)
 }
 
+func getMajorVersion(version string) string {
+	parts := strings.Split(version, ".")
+	if len(parts) >= 2 {
+		return parts[0] + "." + parts[1]
+	}
+	return version
+}
+
+func ignoreUpdate(installed model.AppInstall) bool {
+	if installed.App.Type == "php" || installed.Status == constant.Installing {
+		return true
+	}
+	if installed.App.Key == constant.AppMysql {
+		majorVersion := getMajorVersion(installed.Version)
+		appDetails, _ := appDetailRepo.GetBy(appDetailRepo.WithAppId(installed.App.ID))
+		for _, appDetail := range appDetails {
+			if strings.HasPrefix(appDetail.Version, majorVersion) && common.CompareVersion(appDetail.Version, installed.Version) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
 func handleInstalled(appInstallList []model.AppInstall, updated bool, sync bool) ([]response.AppInstallDTO, error) {
 	var (
 		res           []response.AppInstallDTO
@@ -1246,7 +1283,7 @@ func handleInstalled(appInstallList []model.AppInstall, updated bool, sync bool)
 	}
 
 	for _, installed := range appInstallList {
-		if updated && (installed.App.Type == "php" || installed.Status == constant.Installing || (installed.App.Key == constant.AppMysql && installed.Version == "5.6.51")) {
+		if updated && ignoreUpdate(installed) {
 			continue
 		}
 		if sync && !doNotNeedSync(installed) {

@@ -25,6 +25,7 @@ type IBackupRepo interface {
 	WithByFileName(fileName string) DBOption
 	WithByType(backupType string) DBOption
 	WithByCronID(cronjobID uint) DBOption
+	WithFileNameStartWith(filePrefix string) DBOption
 }
 
 func NewIBackupRepo() IBackupRepo {
@@ -78,6 +79,12 @@ func (u *BackupRepo) WithByFileName(fileName string) DBOption {
 			return g
 		}
 		return g.Where("file_name = ?", fileName)
+	}
+}
+
+func (u *BackupRepo) WithFileNameStartWith(filePrefix string) DBOption {
+	return func(g *gorm.DB) *gorm.DB {
+		return g.Where("file_name LIKE ?", filePrefix+"%")
 	}
 }
 

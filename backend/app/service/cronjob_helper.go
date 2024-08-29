@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	pathUtils "path"
 	"strings"
 	"time"
 
@@ -139,7 +140,6 @@ func handleTar(sourceDir, targetDir, name, exclusionRules string, secret string)
 
 	excludes := strings.Split(exclusionRules, ",")
 	excludeRules := ""
-	excludes = append(excludes, "*.sock")
 	for _, exclude := range excludes {
 		if len(exclude) == 0 {
 			continue
@@ -162,10 +162,14 @@ func handleTar(sourceDir, targetDir, name, exclusionRules string, secret string)
 
 	if len(secret) != 0 {
 		extraCmd := "| openssl enc -aes-256-cbc -salt -k '" + secret + "' -out"
-		commands = fmt.Sprintf("tar --warning=no-file-changed --ignore-failed-read -zcf %s %s %s %s", " -"+excludeRules, path, extraCmd, targetDir+"/"+name)
+		commands = fmt.Sprintf("tar --warning=no-file-changed --ignore-failed-read --exclude-from=<(find %s -type s -print) -zcf %s %s %s %s", sourceDir, " -"+excludeRules, path, extraCmd, targetDir+"/"+name)
 		global.LOG.Debug(strings.ReplaceAll(commands, fmt.Sprintf(" %s ", secret), "******"))
 	} else {
-		commands = fmt.Sprintf("tar --warning=no-file-changed --ignore-failed-read -zcf %s %s %s", targetDir+"/"+name, excludeRules, path)
+		itemPrefix := pathUtils.Base(sourceDir)
+		if itemPrefix == "/" {
+			itemPrefix = ""
+		}
+		commands = fmt.Sprintf("tar --warning=no-file-changed --ignore-failed-read --exclude-from=<(find %s -type s -printf '%s' | sed 's|^|%s/|') -zcf %s %s %s", sourceDir, "%P\n", itemPrefix, targetDir+"/"+name, excludeRules, path)
 		global.LOG.Debug(commands)
 	}
 	stdout, err := cmd.ExecWithTimeOut(commands, 24*time.Hour)
@@ -239,7 +243,6 @@ func (u *CronjobService) handleCutWebsiteLog(cronjob *model.Cronjob, startTime t
 			_ = fileOp.WriteFile(srcErrorLogPath, strings.NewReader(""), 0755)
 		}
 		msg := i18n.GetMsgWithMap("CutWebsiteLogSuccess", map[string]interface{}{"name": website.PrimaryDomain, "path": dstFilePath})
-		global.LOG.Infof(msg)
 		msgs = append(msgs, msg)
 	}
 	u.removeExpiredLog(*cronjob)
@@ -326,7 +329,6 @@ func (u *CronjobService) uploadCronjobBackFile(cronjob model.Cronjob, accountMap
 }
 
 func (u *CronjobService) removeExpiredBackup(cronjob model.Cronjob, accountMap map[string]cronjobUploadHelper, record model.BackupRecord) {
-	global.LOG.Infof("start to handle remove expired, retain copies: %d", cronjob.RetainCopies)
 	var opts []repo.DBOption
 	opts = append(opts, commonRepo.WithByFrom("cronjob"))
 	opts = append(opts, backupRepo.WithByCronID(cronjob.ID))
@@ -361,7 +363,6 @@ func (u *CronjobService) removeExpiredBackup(cronjob model.Cronjob, accountMap m
 }
 
 func (u *CronjobService) removeExpiredLog(cronjob model.Cronjob) {
-	global.LOG.Infof("start to handle remove expired, retain copies: %d", cronjob.RetainCopies)
 	records, _ := cronjobRepo.ListRecord(cronjobRepo.WithByJobID(int(cronjob.ID)), commonRepo.WithOrderBy("created_at desc"))
 	if len(records) <= int(cronjob.RetainCopies) {
 		return

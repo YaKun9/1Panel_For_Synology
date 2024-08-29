@@ -141,7 +141,7 @@ func shouldFilterPath(path string) bool {
 func (f *FileService) buildFileTree(node *response.FileTree, items []*files.FileInfo, op request.FileOption, level int) error {
 	for _, v := range items {
 		if shouldFilterPath(v.Path) {
-			global.LOG.Info("File Tree: Skipping %s due to filter\n", v.Path)
+			global.LOG.Infof("File Tree: Skipping %s due to filter\n", v.Path)
 			continue
 		}
 		childNode := response.FileTree{
@@ -167,7 +167,7 @@ func (f *FileService) buildChildNode(childNode *response.FileTree, fileInfo *fil
 	subInfo, err := files.NewFileInfo(op.FileOption)
 	if err != nil {
 		if os.IsPermission(err) || errors.Is(err, unix.EACCES) {
-			global.LOG.Info("File Tree: Skipping %s due to permission denied\n", fileInfo.Path)
+			global.LOG.Infof("File Tree: Skipping %s due to permission denied\n", fileInfo.Path)
 			return nil
 		}
 		global.LOG.Errorf("File Tree: Skipping %s due to error: %s\n", fileInfo.Path, err.Error())
@@ -474,11 +474,20 @@ func (f *FileService) ReadLogByLine(req request.FileReadByLineReq) (*response.Fi
 	if err != nil {
 		return nil, err
 	}
+	if req.Latest && req.Page == 1 && len(lines) < 1000 && total > 1 {
+		preLines, _, _, err := files.ReadFileByLine(logFilePath, total-1, req.PageSize, false)
+		if err != nil {
+			return nil, err
+		}
+		lines = append(preLines, lines...)
+	}
+
 	res := &response.FileLineContent{
 		Content: strings.Join(lines, "\n"),
 		End:     isEndOfFile,
 		Path:    logFilePath,
 		Total:   total,
+		Lines:   lines,
 	}
 	return res, nil
 }

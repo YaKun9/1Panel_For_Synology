@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/1Panel-dev/1Panel/backend/utils/docker"
 	"os"
 	"path"
 	"reflect"
@@ -141,6 +142,7 @@ func (w WebsiteService) PageWebsite(req request.WebsiteSearch) (int64, []respons
 		var (
 			appName      string
 			runtimeName  string
+			runtimeType  string
 			appInstallID uint
 		)
 		switch web.Type {
@@ -157,6 +159,7 @@ func (w WebsiteService) PageWebsite(req request.WebsiteSearch) (int64, []respons
 				return 0, nil, err
 			}
 			runtimeName = runtime.Name
+			runtimeType = runtime.Type
 			appInstallID = runtime.ID
 		}
 		sitePath := path.Join(constant.AppInstallDir, constant.AppOpenresty, nginxInstall.Name, "www", "sites", web.Alias)
@@ -177,6 +180,7 @@ func (w WebsiteService) PageWebsite(req request.WebsiteSearch) (int64, []respons
 			RuntimeName:   runtimeName,
 			SitePath:      sitePath,
 			AppInstallID:  appInstallID,
+			RuntimeType:   runtimeType,
 		})
 	}
 	return total, websiteDTOs, nil
@@ -309,6 +313,14 @@ func (w WebsiteService) CreateWebsite(create request.WebsiteCreate) (err error) 
 		switch runtime.Type {
 		case constant.RuntimePHP:
 			if runtime.Resource == constant.ResourceAppstore {
+				client, err := docker.NewDockerClient()
+				if err != nil {
+					return err
+				}
+				defer client.Close()
+				if !checkImageExist(client, runtime.Image) {
+					return buserr.WithName("ErrImageNotExist", runtime.Name)
+				}
 				var (
 					req     request.AppInstallCreate
 					install *model.AppInstall
@@ -475,7 +487,9 @@ func (w WebsiteService) DeleteWebsite(req request.WebsiteDelete) error {
 	tx, ctx := helper.GetTxAndContext()
 	defer tx.Rollback()
 
-	go NewIBackupService().DeleteRecordByName("website", website.PrimaryDomain, website.Alias, req.DeleteBackup)
+	go func() {
+		_ = NewIBackupService().DeleteRecordByName("website", website.PrimaryDomain, website.Alias, req.DeleteBackup)
+	}()
 	if err := websiteRepo.DeleteBy(ctx, commonRepo.WithByID(req.ID)); err != nil {
 		return err
 	}

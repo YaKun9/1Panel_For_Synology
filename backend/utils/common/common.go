@@ -256,13 +256,6 @@ func LoadSizeUnit2F(value float64) string {
 	return fmt.Sprintf("%.2f", value)
 }
 
-func LoadTimeZone() string {
-	loc := time.Now().Location()
-	if _, err := time.LoadLocation(loc.String()); err != nil {
-		return "Asia/Shanghai"
-	}
-	return loc.String()
-}
 func LoadTimeZoneByCmd() string {
 	loc := time.Now().Location().String()
 	if _, err := time.LoadLocation(loc); err != nil {
@@ -324,4 +317,28 @@ func SplitStr(str string, spi ...string) []string {
 
 func IsValidIP(ip string) bool {
 	return net.ParseIP(ip) != nil
+}
+
+const (
+	b  = uint64(1)
+	kb = 1024 * b
+	mb = 1024 * kb
+	gb = 1024 * mb
+)
+
+func FormatBytes(bytes uint64) string {
+	switch {
+	case bytes < kb:
+		return fmt.Sprintf("%dB", bytes)
+	case bytes < mb:
+		return fmt.Sprintf("%.2fKB", float64(bytes)/float64(kb))
+	case bytes < gb:
+		return fmt.Sprintf("%.2fMB", float64(bytes)/float64(mb))
+	default:
+		return fmt.Sprintf("%.2fGB", float64(bytes)/float64(gb))
+	}
+}
+
+func FormatPercent(percent float64) string {
+	return fmt.Sprintf("%.2f%%", percent)
 }

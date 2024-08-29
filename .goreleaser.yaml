@@ -35,7 +35,8 @@ archives:
     
 checksum:
   name_template: 'checksums.txt'
-  
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
 release:
   draft: true
   mode: append

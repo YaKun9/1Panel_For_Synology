@@ -94,6 +94,7 @@ ErrPathPermission: 'index 目錄下偵測到非 1000:1000 權限資料夾，可�
 ErrDomainIsUsed: "域名已被網站【{{ .name }}】使用"
 ErrDomainFormat: "{{ .name }} 域名格式不正確"
 ErrDefaultAlias: "default 為保留代號，請使用其他代號"
+ErrImageNotExist: "執行環境 {{.name}} 鏡像不存在，請重新編輯執行環境"
 
 #ssl
 ErrSSLCannotDelete: "{{ .name }} 證書正在被網站使用，無法刪除"
@@ -198,3 +199,10 @@ ErrLicenseSync: "許可證信息同步失敗，資料庫中未檢測到許可證
 ErrXpackNotFound: "該部分為專業版功能，請先在 面板設置-許可證 界面導入許可證"
 ErrXpackNotActive: "該部分為專業版功能，請先在 面板設置-許可證 界面同步許可證狀態"
 ErrXpackOutOfDate: "當前許可證已過期，請重新在 面板設置-許可證 界面導入許可證"
+
+#license
+ErrAlert: "告警資訊格式錯誤，請檢查後重試！"
+ErrAlertPush: "告警資訊推送錯誤，請檢查後重試！"
+ErrAlertSave: "告警資訊保存錯誤，請檢查後重試！"
+ErrAlertSync: "告警資訊同步錯誤，請檢查後重試！"
+ErrAlertRemote: "告警資訊遠端錯誤，請檢查後重試！"
