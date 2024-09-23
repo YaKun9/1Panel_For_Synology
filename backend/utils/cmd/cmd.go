@@ -16,7 +16,7 @@ import (
 )
 
 func Exec(cmdStr string) (string, error) {
-	return ExecWithTimeOut(cmdStr, 20*time.Second)
+	return ExecWithTimeOut(cmdStr, 180*time.Second)
 }
 
 func handleErr(stdout, stderr bytes.Buffer, err error) (string, error) {

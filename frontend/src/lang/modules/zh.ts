@@ -1534,8 +1534,8 @@ const message = {
         backupRecoverMessage: '请输入压缩或解压缩密码（留空则不设置）',
     },
     license: {
-        community: '社区版：',
-        community2: '社区版',
+        community: '群晖定制：',
+        community2: '群晖定制',
         pro: '专业版：',
         trial: '试用版',
         office: '正式版',
@@ -2279,6 +2279,22 @@ const message = {
             ERROR: '错误',
             statusCode: '状态码',
             manage: '管理',
+        },
+    },
+    xpack: {
+        waf: {
+            contain: '包含',
+            equal: '等于',
+            regex: '正则',
+            notEqual: '不等于',
+            badReq: '参数错误',
+            forbidden: '无权访问',
+            noRes: '无返回',
+            serverErr: '服务器错误',
+            actionAllow: '允许',
+            deny: '拒绝',
+            captcha: '验证码',
+            fiveSeconds: '五秒',
         },
     },
 };
