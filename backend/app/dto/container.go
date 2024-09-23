@@ -116,7 +116,7 @@ type PortHelper struct {
 
 type ContainerOperation struct {
 	Names     []string `json:"names" validate:"required"`
-	Operation string   `json:"operation" validate:"required,oneof=start stop restart kill pause unpause remove"`
+	Operation string   `json:"operation" validate:"required,oneof=up start stop restart kill pause unpause remove"`
 }
 
 type ContainerRename struct {
@@ -208,22 +208,24 @@ type ComposeContainer struct {
 	State       string `json:"state"`
 }
 type ComposeCreate struct {
-	Name     string `json:"name"`
-	From     string `json:"from" validate:"required,oneof=edit path template"`
-	File     string `json:"file"`
-	Path     string `json:"path"`
-	Template uint   `json:"template"`
+	Name     string   `json:"name"`
+	From     string   `json:"from" validate:"required,oneof=edit path template"`
+	File     string   `json:"file"`
+	Path     string   `json:"path"`
+	Template uint     `json:"template"`
+	Env      []string `json:"env"`
 }
 type ComposeOperation struct {
 	Name      string `json:"name" validate:"required"`
 	Path      string `json:"path" validate:"required"`
-	Operation string `json:"operation" validate:"required,oneof=start stop down"`
+	Operation string `json:"operation" validate:"required,oneof=up start stop down"`
 	WithFile  bool   `json:"withFile"`
 }
 type ComposeUpdate struct {
-	Name    string `json:"name" validate:"required"`
-	Path    string `json:"path" validate:"required"`
-	Content string `json:"content" validate:"required"`
+	Name    string   `json:"name" validate:"required"`
+	Path    string   `json:"path" validate:"required"`
+	Content string   `json:"content" validate:"required"`
+	Env     []string `json:"env"`
 }
 
 type ContainerLog struct {

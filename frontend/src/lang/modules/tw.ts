@@ -629,6 +629,7 @@ const message = {
         emptyUser: '為空時，將使用容器默認的用戶登錄',
         privileged: '特權模式',
         privilegedHelper: '允許容器在主機上執行某些特權操作，可能會增加容器風險，請謹慎開啟！',
+        editComposeHelper: '在菜單中手動輸入的環境變量會覆蓋原有的同名變量，若不存在則新增。',
 
         upgradeHelper: '倉庫名稱/鏡像名稱:鏡像版本',
         upgradeWarning2: '升級操作需要重建容器，任何未持久化的數據將會丟失，是否繼續？',
@@ -751,6 +752,7 @@ const message = {
         content: '內容',
         contentEmpty: '編排內容不能為空，請輸入後重試！',
         containerNumber: '容器數量',
+        containerStatus: '容器狀態',
         down: '刪除',
         up: '啟動',
         composeDetailHelper: '該 compose 為 1Panel 編排外部創建。暫不支持啟停操作。',
@@ -1211,6 +1213,7 @@ const message = {
         noNameFolder: '未命名資料夾',
         noNameFile: '未命名檔案',
         minimap: '縮略圖',
+        fileCanNotRead: '此文件不支持預覽',
     },
     ssh: {
         autoStart: '開機自啟',
@@ -1322,6 +1325,7 @@ const message = {
         LOCAL: '服務器磁盤',
         OSS: '阿裏雲 OSS',
         S3: '亞馬遜 S3 雲存儲',
+        mode: '模式',
         MINIO: 'MINIO',
         SFTP: 'SFTP',
         WebDAV: 'WebDAV',

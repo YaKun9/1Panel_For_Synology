@@ -42,39 +42,37 @@
 
         <el-row :gutter="20" style="margin-top: 20px">
             <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
-                <CardWithHeader :header="$t('home.overview')" height="166px">
+                <CardWithHeader :header="$t('home.overview')">
                     <template #body>
                         <div class="h-overview">
-                            <el-row>
-                                <el-col :span="6">
-                                    <span>{{ $t('menu.website') }}</span>
-                                    <div class="count">
-                                        <span @click="goRouter('/websites')">{{ baseInfo?.websiteNumber }}</span>
-                                    </div>
-                                </el-col>
-                                <el-col :span="6">
-                                    <span>{{ $t('menu.database') }} - {{ $t('database.all') }}</span>
-                                    <div class="count">
-                                        <span @click="goRouter('/databases')">{{ baseInfo?.databaseNumber }}</span>
-                                    </div>
-                                </el-col>
-                                <el-col :span="6">
-                                    <span>{{ $t('menu.cronjob') }}</span>
-                                    <div class="count">
-                                        <span @click="goRouter('/cronjobs')">
-                                            {{ baseInfo?.cronjobNumber }}
-                                        </span>
-                                    </div>
-                                </el-col>
-                                <el-col :span="6">
-                                    <span>{{ $t('home.appInstalled') }}</span>
-                                    <div class="count">
-                                        <span @click="goRouter('/apps/installed')">
-                                            {{ baseInfo?.appInstalledNumber }}
-                                        </span>
-                                    </div>
-                                </el-col>
-                            </el-row>
+                            <div>
+                                <span>{{ $t('menu.website') }}</span>
+                                <div class="count">
+                                    <span @click="goRouter('/websites')">{{ baseInfo?.websiteNumber }}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span>{{ $t('menu.database') }} - {{ $t('database.all') }}</span>
+                                <div class="count">
+                                    <span @click="goRouter('/databases')">{{ baseInfo?.databaseNumber }}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span>{{ $t('menu.cronjob') }}</span>
+                                <div class="count">
+                                    <span @click="goRouter('/cronjobs')">
+                                        {{ baseInfo?.cronjobNumber }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <span>{{ $t('home.appInstalled') }}</span>
+                                <div class="count">
+                                    <span @click="goRouter('/apps/installed')">
+                                        {{ baseInfo?.appInstalledNumber }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </CardWithHeader>
@@ -85,42 +83,44 @@
                 </CardWithHeader>
                 <CardWithHeader :header="$t('menu.monitor')" style="margin-top: 20px; margin-bottom: 20px">
                     <template #header-r>
-                        <el-radio-group
-                            style="float: right; margin-left: 5px"
-                            v-model="chartOption"
-                            @change="changeOption"
+                        <div
+                            class="float-right flex flex-col items-end flex-wrap sm:items-center gap-2 sm:flex-row sm:gap-4"
                         >
-                            <el-radio-button value="network">{{ $t('home.network') }}</el-radio-button>
-                            <el-radio-button value="io">{{ $t('home.io') }}</el-radio-button>
-                        </el-radio-group>
-                        <el-select
-                            v-if="chartOption === 'network'"
-                            @change="onLoadBaseInfo(false, 'network')"
-                            v-model="searchInfo.netOption"
-                            class="p-w-200 float-right"
-                        >
-                            <template #prefix>{{ $t('home.networkCard') }}</template>
-                            <el-option
-                                v-for="item in netOptions"
-                                :key="item"
-                                :label="item == 'all' ? $t('commons.table.all') : item"
-                                :value="item"
-                            />
-                        </el-select>
-                        <el-select
-                            v-if="chartOption === 'io'"
-                            v-model="searchInfo.ioOption"
-                            @change="onLoadBaseInfo(false, 'io')"
-                            class="p-w-200 float-right"
-                        >
-                            <template #prefix>{{ $t('home.disk') }}</template>
-                            <el-option
-                                v-for="item in ioOptions"
-                                :key="item"
-                                :label="item == 'all' ? $t('commons.table.all') : item"
-                                :value="item"
-                            />
-                        </el-select>
+                            <el-radio-group v-model="chartOption" @change="changeOption">
+                                <el-radio-button value="network">{{ $t('home.network') }}</el-radio-button>
+                                <el-radio-button value="io">{{ $t('home.io') }}</el-radio-button>
+                            </el-radio-group>
+                            <div>
+                                <el-select
+                                    v-if="chartOption === 'network'"
+                                    @change="onLoadBaseInfo(false, 'network')"
+                                    v-model="searchInfo.netOption"
+                                    class="p-w-200 float-right"
+                                >
+                                    <template #prefix>{{ $t('home.networkCard') }}</template>
+                                    <el-option
+                                        v-for="item in netOptions"
+                                        :key="item"
+                                        :label="item == 'all' ? $t('commons.table.all') : item"
+                                        :value="item"
+                                    />
+                                </el-select>
+                                <el-select
+                                    v-if="chartOption === 'io'"
+                                    v-model="searchInfo.ioOption"
+                                    @change="onLoadBaseInfo(false, 'io')"
+                                    class="p-w-200 float-right"
+                                >
+                                    <template #prefix>{{ $t('home.disk') }}</template>
+                                    <el-option
+                                        v-for="item in ioOptions"
+                                        :key="item"
+                                        :label="item == 'all' ? $t('commons.table.all') : item"
+                                        :value="item"
+                                    />
+                                </el-select>
+                            </div>
+                        </div>
                     </template>
                     <template #body>
                         <div style="position: relative; margin-top: 20px">
@@ -309,6 +309,7 @@ const isProductPro = ref();
 const searchInfo = reactive({
     ioOption: 'all',
     netOption: 'all',
+    scope: 'all',
 });
 
 const baseInfo = ref<Dashboard.BaseInfo>({
@@ -364,6 +365,7 @@ const currentInfo = ref<Dashboard.CurrentInfo>({
 
     diskData: [],
     gpuData: [],
+    xpuData: [],
 
     netBytesSent: 0,
     netBytesRecv: 0,
@@ -415,77 +417,146 @@ const onLoadBaseInfo = async (isInit: boolean, range: string) => {
     }
     const res = await loadBaseInfo(searchInfo.ioOption, searchInfo.netOption);
     baseInfo.value = res.data;
-    currentInfo.value = baseInfo.value.currentInfo;
-    await onLoadCurrentInfo();
+
+    const resData = res.data.currentInfo;
+    currentInfo.value.ioReadBytes = resData.ioReadBytes;
+    currentInfo.value.ioWriteBytes = resData.ioWriteBytes;
+    currentInfo.value.ioCount = resData.ioCount;
+    currentInfo.value.ioReadTime = resData.ioReadTime;
+    currentInfo.value.ioWriteTime = resData.ioWriteTime;
+    currentInfo.value.netBytesSent = resData.netBytesSent;
+    currentInfo.value.netBytesRecv = resData.netBytesRecv;
+    currentInfo.value.uptime = resData.uptime;
+
+    loadAppCurrentInfo();
     isStatusInit.value = false;
     statusRef.value.acceptParams(currentInfo.value, baseInfo.value, isStatusInit.value);
     appRef.value.acceptParams();
     if (isInit) {
         timer = setInterval(async () => {
             if (isActive.value && !globalStore.isOnRestart) {
-                await onLoadCurrentInfo();
+                loadAppCurrentInfo();
             }
         }, 3000);
     }
 };
 
-const onLoadCurrentInfo = async () => {
-    const res = await loadCurrentInfo(searchInfo.ioOption, searchInfo.netOption);
-    currentInfo.value.timeSinceUptime = res.data.timeSinceUptime;
-
-    let timeInterval = Number(res.data.uptime - currentInfo.value.uptime) || 3;
-    currentChartInfo.netBytesSent =
-        res.data.netBytesSent - currentInfo.value.netBytesSent > 0
-            ? Number(((res.data.netBytesSent - currentInfo.value.netBytesSent) / 1024 / timeInterval).toFixed(2))
-            : 0;
-    netBytesSents.value.push(currentChartInfo.netBytesSent);
-    if (netBytesSents.value.length > 20) {
-        netBytesSents.value.splice(0, 1);
-    }
-
-    currentChartInfo.netBytesRecv =
-        res.data.netBytesRecv - currentInfo.value.netBytesRecv > 0
-            ? Number(((res.data.netBytesRecv - currentInfo.value.netBytesRecv) / 1024 / timeInterval).toFixed(2))
-            : 0;
-    netBytesRecvs.value.push(currentChartInfo.netBytesRecv);
-    if (netBytesRecvs.value.length > 20) {
-        netBytesRecvs.value.splice(0, 1);
-    }
-
-    currentChartInfo.ioReadBytes =
-        res.data.ioReadBytes - currentInfo.value.ioReadBytes > 0
-            ? Number(((res.data.ioReadBytes - currentInfo.value.ioReadBytes) / 1024 / 1024 / timeInterval).toFixed(2))
-            : 0;
-    ioReadBytes.value.push(currentChartInfo.ioReadBytes);
-    if (ioReadBytes.value.length > 20) {
-        ioReadBytes.value.splice(0, 1);
-    }
-
-    currentChartInfo.ioWriteBytes =
-        res.data.ioWriteBytes - currentInfo.value.ioWriteBytes > 0
-            ? Number(((res.data.ioWriteBytes - currentInfo.value.ioWriteBytes) / 1024 / 1024 / timeInterval).toFixed(2))
-            : 0;
-    ioWriteBytes.value.push(currentChartInfo.ioWriteBytes);
-    if (ioWriteBytes.value.length > 20) {
-        ioWriteBytes.value.splice(0, 1);
-    }
-    currentChartInfo.ioCount = Math.round(Number((res.data.ioCount - currentInfo.value.ioCount) / timeInterval));
-    let ioReadTime = res.data.ioReadTime - currentInfo.value.ioReadTime;
-    let ioWriteTime = res.data.ioWriteTime - currentInfo.value.ioWriteTime;
-    let ioChoose = ioReadTime > ioWriteTime ? ioReadTime : ioWriteTime;
-    currentChartInfo.ioTime = Math.round(Number(ioChoose / timeInterval));
-
-    timeIODatas.value.push(dateFormatForSecond(res.data.shotTime));
-    if (timeIODatas.value.length > 20) {
-        timeIODatas.value.splice(0, 1);
-    }
-    timeNetDatas.value.push(dateFormatForSecond(res.data.shotTime));
-    if (timeNetDatas.value.length > 20) {
-        timeNetDatas.value.splice(0, 1);
-    }
-    loadData();
-    currentInfo.value = res.data;
+const loadAppCurrentInfo = async () => {
+    await Promise.all([onLoadCurrentInfo('gpu'), onLoadCurrentInfo('basic'), onLoadCurrentInfo('ioNet')]);
     statusRef.value.acceptParams(currentInfo.value, baseInfo.value, isStatusInit.value);
+};
+
+const onLoadCurrentInfo = async (scope: string) => {
+    const req = {
+        scope: scope,
+        ioOption: searchInfo.ioOption,
+        netOption: searchInfo.netOption,
+    };
+    const res = await loadCurrentInfo(req);
+    const resData = res.data;
+
+    if (scope === 'ioNet') {
+        let timeInterval = Number(res.data.uptime - currentInfo.value.uptime) || 3;
+        currentChartInfo.netBytesSent =
+            res.data.netBytesSent - currentInfo.value.netBytesSent > 0
+                ? Number(((res.data.netBytesSent - currentInfo.value.netBytesSent) / 1024 / timeInterval).toFixed(2))
+                : 0;
+        netBytesSents.value.push(currentChartInfo.netBytesSent);
+
+        if (netBytesSents.value.length > 20) {
+            netBytesSents.value.splice(0, 1);
+        }
+
+        currentChartInfo.netBytesRecv =
+            res.data.netBytesRecv - currentInfo.value.netBytesRecv > 0
+                ? Number(((res.data.netBytesRecv - currentInfo.value.netBytesRecv) / 1024 / timeInterval).toFixed(2))
+                : 0;
+        netBytesRecvs.value.push(currentChartInfo.netBytesRecv);
+        if (netBytesRecvs.value.length > 20) {
+            netBytesRecvs.value.splice(0, 1);
+        }
+
+        currentChartInfo.ioReadBytes =
+            res.data.ioReadBytes - currentInfo.value.ioReadBytes > 0
+                ? Number(
+                      ((res.data.ioReadBytes - currentInfo.value.ioReadBytes) / 1024 / 1024 / timeInterval).toFixed(2),
+                  )
+                : 0;
+        ioReadBytes.value.push(currentChartInfo.ioReadBytes);
+        if (ioReadBytes.value.length > 20) {
+            ioReadBytes.value.splice(0, 1);
+        }
+
+        currentChartInfo.ioWriteBytes =
+            res.data.ioWriteBytes - currentInfo.value.ioWriteBytes > 0
+                ? Number(
+                      ((res.data.ioWriteBytes - currentInfo.value.ioWriteBytes) / 1024 / 1024 / timeInterval).toFixed(
+                          2,
+                      ),
+                  )
+                : 0;
+        ioWriteBytes.value.push(currentChartInfo.ioWriteBytes);
+        if (ioWriteBytes.value.length > 20) {
+            ioWriteBytes.value.splice(0, 1);
+        }
+        currentChartInfo.ioCount = Math.round(Number((res.data.ioCount - currentInfo.value.ioCount) / timeInterval));
+        let ioReadTime = res.data.ioReadTime - currentInfo.value.ioReadTime;
+        let ioWriteTime = res.data.ioWriteTime - currentInfo.value.ioWriteTime;
+        let ioChoose = ioReadTime > ioWriteTime ? ioReadTime : ioWriteTime;
+        currentChartInfo.ioTime = Math.round(Number(ioChoose / timeInterval));
+
+        timeIODatas.value.push(dateFormatForSecond(res.data.shotTime));
+        if (timeIODatas.value.length > 20) {
+            timeIODatas.value.splice(0, 1);
+        }
+        timeNetDatas.value.push(dateFormatForSecond(res.data.shotTime));
+        if (timeNetDatas.value.length > 20) {
+            timeNetDatas.value.splice(0, 1);
+        }
+        loadData();
+
+        currentInfo.value.ioReadBytes = resData.ioReadBytes;
+        currentInfo.value.ioWriteBytes = resData.ioWriteBytes;
+        currentInfo.value.ioCount = resData.ioCount;
+        currentInfo.value.ioReadTime = resData.ioReadTime;
+        currentInfo.value.ioWriteTime = resData.ioWriteTime;
+
+        currentInfo.value.netBytesSent = resData.netBytesSent;
+        currentInfo.value.netBytesRecv = resData.netBytesRecv;
+    }
+    if (scope === 'gpu') {
+        currentInfo.value.gpuData = resData.gpuData;
+        currentInfo.value.xpuData = resData.xpuData;
+    }
+    if (scope === 'basic') {
+        currentInfo.value.uptime = resData.uptime;
+        currentInfo.value.timeSinceUptime = resData.timeSinceUptime;
+        currentInfo.value.procs = resData.procs;
+
+        currentInfo.value.load1 = resData.load1;
+        currentInfo.value.load5 = resData.load5;
+        currentInfo.value.load15 = resData.load15;
+        currentInfo.value.loadUsagePercent = resData.loadUsagePercent;
+
+        currentInfo.value.cpuPercent = resData.cpuPercent;
+        currentInfo.value.cpuUsedPercent = resData.cpuUsedPercent;
+        currentInfo.value.cpuUsed = resData.cpuUsed;
+        currentInfo.value.cpuTotal = resData.cpuTotal;
+
+        currentInfo.value.memoryTotal = resData.memoryTotal;
+        currentInfo.value.memoryAvailable = resData.memoryAvailable;
+        currentInfo.value.memoryUsed = resData.memoryUsed;
+        currentInfo.value.memoryUsedPercent = resData.memoryUsedPercent;
+
+        currentInfo.value.swapMemoryTotal = resData.swapMemoryTotal;
+        currentInfo.value.swapMemoryAvailable = resData.swapMemoryAvailable;
+        currentInfo.value.swapMemoryUsed = resData.swapMemoryUsed;
+        currentInfo.value.swapMemoryUsedPercent = resData.swapMemoryUsedPercent;
+
+        currentInfo.value.timeSinceUptime = res.data.timeSinceUptime;
+        currentInfo.value.shotTime = resData.shotTime;
+        currentInfo.value.diskData = resData.diskData;
+    }
 };
 
 function loadUpTime(uptime: number) {
@@ -614,10 +685,22 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .h-overview {
     text-align: center;
-
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
     span:first-child {
         font-size: 14px;
         color: var(--el-text-color-regular);
+    }
+    @media only screen and (max-width: 1300px) {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        span:first-child {
+            font-size: 16px;
+            color: var(--el-text-color-regular);
+        }
     }
 
     .count {

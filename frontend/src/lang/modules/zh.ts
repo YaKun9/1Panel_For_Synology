@@ -632,6 +632,7 @@ const message = {
         emptyUser: '为空时，将使用容器默认的用户登录',
         privileged: '特权模式',
         privilegedHelper: '允许容器在主机上执行某些特权操作，可能会增加容器风险，谨慎开启！',
+        editComposeHelper: '菜单中手动输入的环境变量会覆盖原有的同名变量，如果不存在则新增',
 
         upgradeHelper: '仓库名称/镜像名称:镜像版本',
         upgradeWarning2: '升级操作需要重建容器，任何未持久化的数据将会丢失，是否继续？',
@@ -754,6 +755,7 @@ const message = {
         content: '内容',
         contentEmpty: '编排内容不能为空，请输入后重试！',
         containerNumber: '容器数量',
+        containerStatus: '容器状态',
         down: '删除',
         up: '启动',
         composeDetailHelper: '该 compose 为 1Panel 编排外部创建。暂不支持启停操作。',
@@ -1215,6 +1217,7 @@ const message = {
         noNameFolder: '未命名文件夹',
         noNameFile: '未命名文件',
         minimap: '缩略图',
+        fileCanNotRead: '此文件不支持预览',
     },
     ssh: {
         autoStart: '开机自启',
@@ -1326,6 +1329,7 @@ const message = {
         LOCAL: '服务器磁盘',
         OSS: '阿里云 OSS',
         S3: '亚马逊 S3 云存储',
+        mode: '模式',
         MINIO: 'MINIO',
         SFTP: 'SFTP',
         WebDAV: 'WebDAV',

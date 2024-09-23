@@ -654,6 +654,8 @@ const message = {
         privileged: 'Privileged',
         privilegedHelper:
             'Allows the container to perform certain privileged operations on the host, which may increase container risks. Use with caution!',
+        editComposeHelper:
+            'The environment variables manually entered in the menu will override existing variables with the same name. If they do not exist, they will be added.',
 
         upgradeHelper: 'Repository Name/Image Name: Image Version',
         upgradeWarning2:
@@ -781,6 +783,7 @@ const message = {
         content: 'Content',
         contentEmpty: 'Compose content cannot be empty, please enter and try again!',
         containerNumber: 'Container number',
+        containerStatus: 'Container Status',
         down: 'Down',
         up: 'Up',
         composeDetailHelper:
@@ -1277,6 +1280,7 @@ const message = {
         noNameFolder: 'Untitled Folder',
         noNameFile: 'Untitled File',
         minimap: 'Code Mini Map',
+        fileCanNotRead: 'File can not read',
     },
     ssh: {
         autoStart: 'Auto Start',
@@ -1409,6 +1413,7 @@ const message = {
         LOCAL: 'Server Disks',
         OSS: 'Ali OSS',
         S3: 'Amazon S3',
+        mode: 'Mode',
         MINIO: 'MINIO',
         SFTP: 'SFTP',
         WebDAV: 'WebDAV',
