@@ -143,7 +143,6 @@ const dialogContainerLogRef = ref();
 
 const opRef = ref();
 
-const emit = defineEmits<{ (e: 'back'): void }>();
 interface DialogProps {
     createdBy: string;
     name: string;
@@ -260,15 +259,18 @@ const onOperate = async (op: string) => {
 };
 
 const onComposeOperate = async (operation: string) => {
-    ElMessageBox.confirm(
-        i18n.global.t('container.composeOperatorHelper', [composeName.value, i18n.global.t('container.' + operation)]),
-        i18n.global.t('container.' + operation),
-        {
-            confirmButtonText: i18n.global.t('commons.button.confirm'),
-            cancelButtonText: i18n.global.t('commons.button.cancel'),
-            type: 'info',
-        },
-    ).then(async () => {
+    let mes =
+        operation === 'down'
+            ? i18n.global.t('container.composeDownHelper', [composeName.value])
+            : i18n.global.t('container.composeOperatorHelper', [
+                  composeName.value,
+                  i18n.global.t('container.' + operation),
+              ]);
+    ElMessageBox.confirm(mes, i18n.global.t('container.' + operation), {
+        confirmButtonText: i18n.global.t('commons.button.confirm'),
+        cancelButtonText: i18n.global.t('commons.button.cancel'),
+        type: 'info',
+    }).then(async () => {
         let params = {
             name: composeName.value,
             path: composePath.value,
@@ -280,11 +282,7 @@ const onComposeOperate = async (operation: string) => {
             .then(() => {
                 loading.value = false;
                 MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-                if (operation === 'down') {
-                    emit('back');
-                } else {
-                    search();
-                }
+                search();
             })
             .catch(() => {
                 loading.value = false;

@@ -19,7 +19,7 @@
                                 placeholder="#Define or paste the content of your docker-compose file here"
                                 :indent-with-tab="true"
                                 :tabSize="4"
-                                style="width: 100%; height: calc(100vh - 175px)"
+                                :style="{ width: '100%', height: `calc(100vh - ${loadHeight()})` }"
                                 :lineWrapping="true"
                                 :matchBrackets="true"
                                 theme="cobalt"
@@ -28,15 +28,34 @@
                                 v-model="content"
                             />
                         </el-form-item>
-                        <el-form-item :label="$t('container.env')" prop="environmentStr">
-                            <el-input
-                                type="textarea"
-                                :placeholder="$t('container.tagHelper')"
-                                :rows="3"
-                                v-model="environmentStr"
-                            />
-                        </el-form-item>
-                        <span class="input-help">{{ $t('container.editComposeHelper') }}</span>
+                        <div v-if="createdBy === '1Panel'">
+                            <el-form-item
+                                :label="$t('container.env')"
+                                prop="environmentStr"
+                                v-if="createdBy === '1Panel'"
+                            >
+                                <el-input
+                                    type="textarea"
+                                    :placeholder="$t('container.tagHelper')"
+                                    :rows="3"
+                                    v-model="environmentStr"
+                                />
+                            </el-form-item>
+                            <span class="input-help whitespace-break-spaces">
+                                {{ $t('container.editComposeHelper') }}
+                            </span>
+                            <codemirror
+                                v-model="envFileContent"
+                                :autofocus="true"
+                                :indent-with-tab="true"
+                                :tabSize="4"
+                                :lineWrapping="true"
+                                :matchBrackets="true"
+                                theme="cobalt"
+                                :styleActiveLine="true"
+                                :extensions="extensions"
+                            ></codemirror>
+                        </div>
                     </el-form>
                 </el-col>
             </el-row>
@@ -64,6 +83,7 @@ import { MsgSuccess } from '@/utils/message';
 import DrawerHeader from '@/components/drawer-header/index.vue';
 import { ElForm } from 'element-plus';
 
+const emit = defineEmits<{ (e: 'search'): void }>();
 const loading = ref(false);
 const composeVisible = ref(false);
 const extensions = [javascript(), oneDark];
@@ -71,6 +91,9 @@ const path = ref();
 const content = ref();
 const name = ref();
 const environmentStr = ref();
+const environmentEnv = ref();
+const createdBy = ref();
+const envFileContent = `env_file:\n  - 1panel.env`;
 
 const onSubmitEdit = async () => {
     const param = {
@@ -78,6 +101,7 @@ const onSubmitEdit = async () => {
         path: path.value,
         content: content.value,
         env: environmentStr.value,
+        createdBy: createdBy.value,
     };
     if (environmentStr.value != undefined) {
         param.env = environmentStr.value.split('\n');
@@ -88,6 +112,7 @@ const onSubmitEdit = async () => {
             loading.value = false;
             MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
             composeVisible.value = false;
+            emit('search');
         })
         .catch(() => {
             loading.value = false;
@@ -98,14 +123,22 @@ interface DialogProps {
     name: string;
     path: string;
     content: string;
+    env: Array<string>;
+    envStr: string;
+    createdBy: string;
 }
 
+const loadHeight = () => {
+    return createdBy.value === '1Panel' ? '300px' : '200px';
+};
 const acceptParams = (props: DialogProps): void => {
     composeVisible.value = true;
     path.value = props.path;
     name.value = props.name;
     content.value = props.content;
-    environmentStr.value = '';
+    createdBy.value = props.createdBy;
+    environmentEnv.value = props.env || [];
+    environmentStr.value = environmentEnv.value.join('\n');
 };
 const handleClose = () => {
     composeVisible.value = false;

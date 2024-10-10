@@ -18,7 +18,14 @@
                                     >
                                         {{ $t('commons.button.sync') }}
                                     </el-button>
-                                    <el-button type="primary" class="ml-3" plain @click="onUnBind()" size="small">
+                                    <el-button
+                                        v-if="!license.offline"
+                                        type="primary"
+                                        class="ml-3"
+                                        plain
+                                        @click="onUnBind()"
+                                        size="small"
+                                    >
                                         {{ $t('license.unbind') }}
                                     </el-button>
                                 </el-descriptions-item>
@@ -124,6 +131,7 @@ const hasLicense = ref();
 const license = reactive({
     licenseName: '',
     trial: true,
+    offline: true,
     expiresAt: '',
     assigneeName: '',
     productName: '',
@@ -201,11 +209,13 @@ const search = async () => {
             hasLicense.value = true;
             if (globalStore.isProductPro) {
                 globalStore.productProExpires = Number(res.data.productPro);
+                globalStore.isTrial = res.data.trial;
             }
             license.licenseName = res.data.licenseName;
             license.message = res.data.message;
             license.assigneeName = res.data.assigneeName;
             license.trial = res.data.trial;
+            license.offline = res.data.offline;
             if (res.data.productPro) {
                 license.productName = 'product-1panel-pro';
                 license.expiresAt =
@@ -220,7 +230,7 @@ const search = async () => {
 };
 
 const showSync = () => {
-    return license.status.indexOf('Lost') !== -1 || license.status === 'Disable';
+    return (license.status.indexOf('Lost') !== -1 || license.status === 'Disable') && !license.offline;
 };
 
 const toUpload = () => {
